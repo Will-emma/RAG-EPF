@@ -1,0 +1,21 @@
+id	title	role	sprint	labels	body
+SETUP-1	Mettre en place l'environnement de développement	Tous	Sprint 0	sprint-0	En tant qu'équipe, je veux un environnement reproductible pour que chacun puisse lancer le projet en local en moins de 10 minutes.
+SETUP-2	Créer le backlog et les tickets GitHub	Scrum master tournant	Sprint 0	sprint-0,docs	En tant qu'équipe, je veux un backlog GitHub avec labels et milestones pour suivre l'avancement.
+BACK-1	Authentification JWT	Backend & Auth	Sprint 1	sprint-1,backend,security	En tant qu'utilisateur, je veux m'inscrire et me connecter pour accéder à mes cours en toute sécurité.
+BACK-2	Upload et pipeline d'ingestion des documents	Backend & RAG	Sprint 1	sprint-1,backend	En tant qu'étudiant, je veux importer un cours (PDF/PPTX/DOCX) pour que son contenu soit exploitable par le chat.
+FRONT-1	Squelette de l'application Angular	Frontend	Sprint 1	sprint-1,frontend	En tant qu'utilisateur, je veux naviguer entre les pages principales de l'application.
+DEVOPS-1	CI de base	Agent & DevOps	Sprint 1	sprint-1,agent-devops	En tant qu'équipe, je veux une CI GitHub Actions pour éviter de casser main avec des PR non testées.
+RAG-1	Recherche vectorielle	Backend & RAG	Sprint 2	sprint-2,backend	En tant que service, je veux retrouver les chunks les plus pertinents pour une question donnée.
+RAG-2	Génération de réponse avec sources	Backend & RAG	Sprint 2	sprint-2,backend	En tant qu'étudiant, je veux une réponse claire avec les sources (cours + page).
+FRONT-2	Page Chat IA	Frontend	Sprint 2	sprint-2,frontend	En tant qu'étudiant, je veux discuter avec mes cours comme dans un chat.
+FRONT-3	Upload de documents (UI)	Frontend	Sprint 2	sprint-2,frontend	En tant qu'étudiant, je veux importer mes cours depuis l'interface et suivre leur statut.
+AGENT-1	Squelette du Study Agent (LangGraph)	Agent & DevOps	Sprint 2	sprint-2,agent-devops	En tant que système, je veux orchestrer plusieurs étapes pour préparer le mode révision.
+AGENT-2	Génération de QCM et évaluation des réponses	Agent & DevOps	Sprint 3	sprint-3,agent-devops	En tant qu'étudiant, je veux être interrogé sous forme de QCM et recevoir un retour.
+FRONT-4	Mode révision / QCM (UI)	Frontend	Sprint 3	sprint-3,frontend	En tant qu'étudiant, je veux m'entraîner avec des QCM générés sur mes cours.
+FRONT-5	Historique des échanges	Frontend	Sprint 3	sprint-3,frontend	En tant qu'étudiant, je veux retrouver mes anciennes questions/réponses.
+SEC-1	Sécurité et isolation des données	Backend & Auth	Sprint 3	sprint-3,security	En tant qu'utilisateur, je veux être sûr que mes documents ne sont visibles que par moi.
+TEST-1	Tests backend (Pytest)	Backend (partagé)	Sprint 3	sprint-3,backend	En tant qu'équipe, je veux des tests automatisés sur les endpoints critiques.
+TEST-2	Tests frontend (Angular)	Frontend	Sprint 3	sprint-3,frontend	En tant qu'équipe, je veux des tests sur les composants clés.
+DEVOPS-2	Déploiement	Agent & DevOps	Sprint 3	sprint-3,agent-devops	En tant qu'équipe, je veux une démo accessible par un lien public pour la soutenance.
+DOC-1	Documentation finale et justification des choix	Tous	Freeze	docs	En tant qu'équipe, je veux pouvoir justifier chaque choix d'architecture et chaque ligne générée par IA.
+DOC-2	Préparation de la soutenance	Tous	Freeze	docs	En tant qu'équipe, je veux une présentation claire et un scénario de démo qui ne plante pas.
