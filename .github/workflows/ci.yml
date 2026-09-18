@@ -23,15 +23,26 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
-    if: hashFiles('frontend/package.json') != ''
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+      - name: Check if frontend exists
+        id: check
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.exists == 'true'
         with:
           node-version: "20"
       - run: npm ci
+        if: steps.check.outputs.exists == 'true'
       - run: npm run build
+        if: steps.check.outputs.exists == 'true'
       - run: npm run lint || true
+        if: steps.check.outputs.exists == 'true'
