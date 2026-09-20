@@ -31,4 +31,8 @@ jobs:
         with:
           node-version: "20"
       - run: npm ci
+      - run: node --version
+      - run: npm --version
+      
       - run: npm run build --if-present
+      
