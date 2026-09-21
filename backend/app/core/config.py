@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
-    ZAI_API_KEY: str = ""
-    ZAI_BASE_URL: str = "https://api.z.ai/api/paas/v4"
-    ZAI_MODEL: str = "glm-5.3-flash"
+    LLM_API_KEY: str = ""
+    LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    LLM_MODEL: str = "z-ai/glm-5.2:free"
 
     EMBEDDING_PROVIDER: str = "local"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
