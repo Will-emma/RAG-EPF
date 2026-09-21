@@ -1,1 +1,123 @@
-<p>revision works!</p>
+<section class="revision-page">
+
+  <header class="revision-header">
+    <div>
+      <span class="page-label">EPF STUDY AI</span>
+      <h1>Révision / QCM</h1>
+      <p>Testez vos connaissances sur les cours de l'EPF.</p>
+    </div>
+  </header>
+
+  @if (!showResult) {
+
+    <div class="quiz-card">
+
+      <div class="quiz-top">
+        <span>
+          Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+        </span>
+
+        <span>
+          {{ progress }}%
+        </span>
+      </div>
+
+      <div class="progress-bar">
+        <div
+          class="progress-value"
+          [style.width.%]="progress"
+        ></div>
+      </div>
+
+      <div class="question-section">
+
+        <h2>
+          {{ currentQuestion.question }}
+        </h2>
+
+        <div class="options">
+
+          @for (option of currentQuestion.options; track $index) {
+
+            <button
+              type="button"
+              class="option"
+              [class.selected]="selectedAnswer === $index"
+              (click)="selectAnswer($index)"
+            >
+              <span class="option-letter">
+                {{ ['A', 'B', 'C', 'D'][$index] }}
+              </span>
+
+              <span class="option-text">
+                {{ option }}
+              </span>
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+      <div class="quiz-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="previousQuestion()"
+          [disabled]="currentQuestionIndex === 0"
+        >
+          ← Question précédente
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="nextQuestion()"
+          [disabled]="selectedAnswer === null"
+        >
+          {{
+            currentQuestionIndex === questions.length - 1
+              ? 'Terminer'
+              : 'Question suivante →'
+          }}
+        </button>
+
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div class="result-card">
+
+      <div class="result-icon">
+        ✓
+      </div>
+
+      <span class="result-label">QUIZ TERMINÉ</span>
+
+      <h2>Votre résultat</h2>
+
+      <div class="score">
+        {{ score }} / {{ questions.length }}
+      </div>
+
+      <p>
+        Vous avez terminé cette session de révision.
+      </p>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="restartQuiz()"
+      >
+        Recommencer
+      </button>
+
+    </div>
+
+  }
+
+</section>
