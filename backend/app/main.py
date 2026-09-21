@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.db.database import init_models
-from app.api.routes import auth, documents, chat
+from app.api.routes import auth, documents, chat, search
 
 app = FastAPI(title="EPF Study AI - RAG API", version="0.1.0")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(documents.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(search.router, prefix="/api")
 
 
 @app.on_event("startup")
