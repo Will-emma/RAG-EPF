@@ -1,9 +1,24 @@
 .app-layout {
   display: flex;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 82px);
+  background: #fff8f8;
 }
 
 .main-content {
   flex: 1;
-  padding: 24px;
+  min-width: 0;
+  padding: 32px;
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(244, 35, 45, 0.08),
+      transparent 25%
+    ),
+    #fff8f8;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px 14px;
+  }
 }

@@ -1,23 +1,60 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { ChatComponent } from './chat.component';
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
-describe('ChatComponent', () => {
-  let component: ChatComponent;
-  let fixture: ComponentFixture<ChatComponent>;
+@Component({
+  selector: 'app-chat',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './chat.component.html',
+  styleUrl: './chat.component.scss'
+})
+export class ChatComponent {
+  userInput = '';
+  isLoading = false;
+  errorMessage = '';
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ChatComponent]
-    })
-    .compileComponents();
+  messages: ChatMessage[] = [
+    {
+      role: 'user',
+      content: 'Bonjour, peux-tu m\'expliquer ce cours ?'
+    },
+    {
+      role: 'assistant',
+      content:
+        'Bien sûr. Je peux vous aider à comprendre les notions importantes du cours.'
+    }
+  ];
 
-    fixture = TestBed.createComponent(ChatComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  sendMessage(): void {
+    const content = this.userInput.trim();
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    if (!content || this.isLoading) {
+      return;
+    }
+
+    this.errorMessage = '';
+
+    this.messages.push({
+      role: 'user',
+      content
+    });
+
+    this.userInput = '';
+    this.isLoading = true;
+
+    setTimeout(() => {
+      this.messages.push({
+        role: 'assistant',
+        content:
+          'Je suis en train d’analyser votre question à partir des cours de l’EPF.'
+      });
+
+      this.isLoading = false;
+    }, 1000);
+  }
+}

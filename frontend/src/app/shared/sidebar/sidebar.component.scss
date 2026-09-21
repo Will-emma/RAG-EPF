@@ -1,25 +1,112 @@
 .sidebar {
-  width: 220px;
-  min-height: calc(100vh - 64px);
-  padding: 20px 12px;
-  background: #f8f9fa;
-  border-right: 1px solid #e5e7eb;
+  width: 230px;
+  min-height: calc(100vh - 72px);
+  padding: 28px 14px;
+  background: #ffffff;
+  border-right: 1px solid #f1dfe1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sidebar a {
-  display: block;
-  padding: 12px 14px;
-  margin-bottom: 4px;
-  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  color: #263548;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .sidebar a:hover {
-  background: #e5e7eb;
+  background: #fff1f2;
+  color: #c9151e;
 }
 
 .sidebar a.active {
-  background: #e5e7eb;
+  background: #fff0f1;
+  color: #d71920;
+  font-weight: 700;
+}
+
+.menu-icon {
+  width: 26px;
+  text-align: center;
+  font-size: 22px;
+  color: #526174;
+}
+
+.sidebar a.active .menu-icon {
+  color: #d71920;
+}
+
+.sidebar-decoration {
+  position: relative;
+  padding: 30px 22px;
+  margin-top: 40px;
+  overflow: hidden;
+  color: #d71920;
+  font-size: 14px;
   font-weight: 600;
+  line-height: 1.4;
+}
+
+.sidebar-decoration::before {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border: 20px solid #fde4e6;
+  border-radius: 50%;
+  left: -120px;
+  bottom: -100px;
+}
+
+.sidebar-decoration span {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-decoration div {
+  width: 28px;
+  height: 3px;
+  margin-top: 14px;
+  background: #d71920;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 72px;
+    padding: 20px 8px;
+  }
+
+  .sidebar a {
+    justify-content: center;
+    padding: 14px 8px;
+  }
+
+  .sidebar a span:last-child {
+    display: none;
+  }
+
+  .sidebar-decoration {
+    display: none;
+  }
+
+  .menu-icon {
+    font-size: 21px;
+  }
 }
