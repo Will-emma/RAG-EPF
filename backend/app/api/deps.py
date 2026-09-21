@@ -1,30 +1,30 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.db.database import init_models
-from app.api.routes import auth, documents, chat
+from app.core.security import decode_access_token
+from app.db.database import get_db
+from app.db.models import User
 
-app = FastAPI(title="EPF Study AI - RAG API", version="0.1.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(auth.router, prefix="/api")
-app.include_router(documents.router, prefix="/api")
-app.include_router(chat.router, prefix="/api")
+bearer_scheme = HTTPBearer()
 
 
-@app.on_event("startup")
-async def on_startup():
-    await init_models()
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Identifiants invalides ou expirés",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    email = decode_access_token(credentials.credentials)
+    if email is None:
+        raise credentials_exception
 
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "env": settings.ENV}
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise credentials_exception
+    return user
