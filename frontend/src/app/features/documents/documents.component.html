@@ -1,1 +1,107 @@
-<p>documents works!</p>
+<section class="documents-page">
+
+  <header class="documents-header">
+    <div>
+      <span class="page-label">EPF STUDY AI</span>
+      <h1>Mes cours</h1>
+      <p>
+        Ajoutez vos documents de cours pour les utiliser avec EPF Study IA.
+      </p>
+    </div>
+  </header>
+
+  <div class="upload-section">
+
+    <div class="upload-card">
+
+      <div
+        class="upload-zone"
+        [class.dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+
+        <div class="upload-icon">↑</div>
+
+        <h2>Ajouter un document</h2>
+
+        <p>
+          Glissez-déposez votre fichier ici
+          <br />
+          ou sélectionnez-le depuis votre ordinateur.
+        </p>
+
+        <label class="select-button">
+          Sélectionner un fichier
+          <input
+            type="file"
+            accept=".pdf,.pptx,.docx"
+            (change)="onFileSelected($event)"
+            hidden
+          />
+        </label>
+
+        <span class="file-info">
+          Formats acceptés : PDF, PPTX, DOCX
+        </span>
+        @if (errorMessage) {
+        <p class="error-message">
+            {{ errorMessage }}
+        </p>
+}
+
+      </div>
+
+      @if (selectedFile) {
+  <div class="selected-file">
+
+    <div class="file-icon">
+      DOC
+    </div>
+
+    <div class="file-details">
+      <strong>{{ selectedFile.name }}</strong>
+      <span>
+        {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+      </span>
+    </div>
+
+    <button
+      type="button"
+      class="remove-button"
+      (click)="removeFile()"
+      [disabled]="isUploading"
+    >
+      Supprimer
+    </button>
+
+  </div>
+
+  <button
+    type="button"
+    class="upload-button"
+    (click)="uploadDocument()"
+    [disabled]="isUploading"
+  >
+    {{ isUploading ? 'Téléchargement...' : 'Télécharger le document' }}
+  </button>
+
+  @if (isUploading) {
+    <div class="upload-status uploading">
+      Téléchargement du document en cours...
+    </div>
+  }
+
+  @if (uploadSuccess) {
+    <div class="upload-status success">
+      Document téléchargé avec succès.
+    </div>
+  }
+}
+
+    </div>
+
+  </div>
+
+</section>
