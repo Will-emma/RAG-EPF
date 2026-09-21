@@ -1,23 +1,44 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 
-import { DocumentsComponent } from './documents.component';
+@Component({
+  selector: 'app-documents',
+  standalone: true,
+  imports: [],
+  templateUrl: './documents.component.html',
+  styleUrl: './documents.component.scss'
+})
+export class DocumentsComponent {
+  selectedFile: File | null = null;
+  isDragging = false;
 
-describe('DocumentsComponent', () => {
-  let component: DocumentsComponent;
-  let fixture: ComponentFixture<DocumentsComponent>;
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [DocumentsComponent]
-    })
-    .compileComponents();
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
 
-    fixture = TestBed.createComponent(DocumentsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+  }
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+
+    if (event.dataTransfer?.files.length) {
+      this.selectedFile = event.dataTransfer.files[0];
+    }
+  }
+
+  removeFile(): void {
+    this.selectedFile = null;
+  }
+}

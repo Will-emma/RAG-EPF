@@ -1,4 +1,3 @@
-/* You can add global styles to this file, and also import other style files */
 * {
   box-sizing: border-box;
 }
@@ -10,7 +9,16 @@ body {
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Inter,
+    Arial,
+    Helvetica,
+    sans-serif;
   color: #1f2937;
-  background: #ffffff;
+  background: #fff8f8;
+}
+
+button,
+input {
+  font-family: inherit;
 }

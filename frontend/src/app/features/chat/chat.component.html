@@ -1,1 +1,48 @@
-<p>chat works!</p>
+<div class="messages">
+  @for (message of messages; track $index) {
+    <div
+      class="message"
+      [class.user-message]="message.role === 'user'"
+      [class.assistant-message]="message.role === 'assistant'"
+    >
+      <div class="message-content">
+        {{ message.content }}
+      </div>
+
+      @if (message.role === 'assistant') {
+        <div class="sources">
+          <div class="source-card">
+            <span class="source-course">Cours IA générative</span>
+            <span class="source-page">Page 12</span>
+          </div>
+
+          <div class="source-card">
+            <span class="source-course">Cours Chatbot</span>
+            <span class="source-page">Page 18</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="message assistant-message">
+      <div class="message-content loading-message">
+        Analyse de votre question...
+      </div>
+    </div>
+  }
+</div>
+<form class="chat-input" (ngSubmit)="sendMessage()">
+  <input
+    type="text"
+    [(ngModel)]="userInput"
+    name="message"
+    placeholder="Posez votre question..."
+    [disabled]="isLoading"
+  />
+
+    <button type="submit" [disabled]="isLoading">
+    {{ isLoading ? 'Analyse...' : 'Envoyer' }}
+  </button>
+</form>

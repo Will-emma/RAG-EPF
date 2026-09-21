@@ -1,0 +1,270 @@
+.documents-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.documents-header {
+  margin-bottom: 32px;
+
+  .page-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #d71920;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 16px;
+  }
+}
+
+.upload-section {
+  display: flex;
+  justify-content: center;
+}
+
+.upload-card {
+  width: 100%;
+  max-width: 850px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #f1dfe1;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(80, 20, 20, 0.06);
+}
+
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 330px;
+  padding: 40px 24px;
+  text-align: center;
+  border: 2px dashed #e5bfc2;
+  border-radius: 14px;
+  background: #fffafa;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.upload-zone.dragging {
+  border-color: #d71920;
+  background: #fff1f2;
+}
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: #fde7e8;
+  color: #d71920;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.upload-zone h2 {
+  margin: 0 0 10px;
+  color: #1f2937;
+  font-size: 21px;
+}
+
+.upload-zone p {
+  margin: 0 0 22px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.select-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 22px;
+  border-radius: 8px;
+  background: #d71920;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.select-button:hover {
+  background: #b9151b;
+  transform: translateY(-1px);
+}
+
+.file-info {
+  margin-top: 16px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #f1dfe1;
+  border-radius: 10px;
+  background: #fffafa;
+}
+
+.file-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #fde7e8;
+  color: #d71920;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+
+  strong {
+    overflow: hidden;
+    color: #1f2937;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: #9ca3af;
+    font-size: 12px;
+  }
+}
+
+.remove-button {
+  padding: 8px 14px;
+  border: 1px solid #f1dfe1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #d71920;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff1f2;
+  }
+}
+
+@media (max-width: 768px) {
+  .documents-page {
+    width: 100%;
+  }
+
+  .documents-header {
+    h1 {
+      font-size: 27px;
+    }
+  }
+
+  .upload-card {
+    padding: 14px;
+  }
+
+  .upload-zone {
+    min-height: 280px;
+    padding: 30px 16px;
+  }
+
+  .selected-file {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .file-details {
+    width: calc(100% - 60px);
+  }
+
+  .remove-button {
+    width: 100%;
+  }
+
+  .error-message {
+  margin: 14px 0 0;
+  color: #d71920;
+  font-size: 13px;
+  font-weight: 500;
+  }
+
+  .upload-button {
+  display: block;
+  width: 100%;
+  max-width: 850px;
+  margin: 20px auto 0;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #d71920;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #b9151b;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #d9a3a5;
+    cursor: not-allowed;
+  }
+}
+
+.upload-status {
+  width: 100%;
+  max-width: 850px;
+  margin: 12px auto 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.uploading {
+  background: #fff4e5;
+  color: #a15c00;
+}
+
+.success {
+  background: #edf8f0;
+  color: #287a3d;
+}
+
+}

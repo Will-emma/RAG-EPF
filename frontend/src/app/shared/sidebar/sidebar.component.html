@@ -1,25 +1,59 @@
 <nav class="sidebar">
-  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-    Accueil
-  </a>
+  <div class="sidebar-menu">
 
-  <a routerLink="/chat" routerLinkActive="active">
-    Chat IA
-  </a>
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <span>Accueil</span>
+    </a>
 
-  <a routerLink="/documents" routerLinkActive="active">
-    Mes cours
-  </a>
+    <a
+      routerLink="/documents"
+      routerLinkActive="active"
+    >
+      
+      <span>Mes cours</span>
+    </a>
 
-  <a routerLink="/revision" routerLinkActive="active">
-    Révision / QCM
-  </a>
+    <a
+      routerLink="/chat"
+      routerLinkActive="active"
+    >
+      
+      <span>Chat IA</span>
+    </a>
 
-  <a routerLink="/history" routerLinkActive="active">
-    Historique
-  </a>
+    <a
+      routerLink="/revision"
+      routerLinkActive="active"
+    >
+      
+      <span>Révision / QCM</span>
+    </a>
 
-  <a routerLink="/profile" routerLinkActive="active">
-    Profil
-  </a>
+    <a
+      routerLink="/history"
+      routerLinkActive="active"
+    >
+    
+      <span>Historique</span>
+    </a>
+
+    <a
+      routerLink="/profile"
+      routerLinkActive="active"
+    >
+     
+      <span>Profil</span>
+    </a>
+
+  </div>
+
+  <div class="sidebar-decoration">
+    <span>Build the future</span>
+    <span>together</span>
+    
+  </div>
 </nav>
