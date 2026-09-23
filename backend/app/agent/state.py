@@ -12,7 +12,9 @@ class AgentState(TypedDict, total=False):
     # Intermédiaire
     course: str | None          # cours identifié (None = tous)
     top_k: int
+    num_questions: int          # nombre de questions QCM à générer
 
     # Sortie
     chunks: list[dict]          # résultats de search()
+    questions: list[dict]       # résultats du QCM généré
     error: str | None
