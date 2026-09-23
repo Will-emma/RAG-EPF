@@ -19,13 +19,8 @@ def build_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-async def ask_llm(question: str, chunks: list[dict]) -> str:
-    context = build_context(chunks)
-    user_prompt = (
-        f"Contexte extrait des cours :\n\n{context}\n\n"
-        f"Question de l'étudiant : {question}"
-    )
-
+async def call_llm(system_prompt: str, user_prompt: str, temperature: float = 0.3) -> str:
+    """Appel générique au LLM (OpenRouter), réutilisable par le chat et par le Study Agent."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             f"{settings.LLM_BASE_URL}/chat/completions",
@@ -33,12 +28,21 @@ async def ask_llm(question: str, chunks: list[dict]) -> str:
             json={
                 "model": settings.LLM_MODEL,
                 "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                "temperature": 0.3,
+                "temperature": temperature,
             },
         )
     response.raise_for_status()
     data = response.json()
     return data["choices"][0]["message"]["content"]
+
+
+async def ask_llm(question: str, chunks: list[dict]) -> str:
+    context = build_context(chunks)
+    user_prompt = (
+        f"Contexte extrait des cours :\n\n{context}\n\n"
+        f"Question de l'étudiant : {question}"
+    )
+    return await call_llm(SYSTEM_PROMPT, user_prompt)
