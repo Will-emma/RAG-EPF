@@ -8,7 +8,29 @@
     </div>
   </header>
 
-  @if (!showResult) {
+  @if (loading) {
+
+    <div class="result-card">
+      <div class="spinner"></div>
+      <p>Génération du quiz à partir de vos cours...</p>
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="result-card">
+      <div class="result-icon">!</div>
+      <span class="result-label">ERREUR</span>
+      <p>{{ errorMessage }}</p>
+      <button
+        type="button"
+        class="primary-button"
+        (click)="loadQuiz()"
+      >
+        Réessayer
+      </button>
+    </div>
+
+  } @else if (!showResult) {
 
     <div class="quiz-card">
 

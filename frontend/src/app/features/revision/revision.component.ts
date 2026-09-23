@@ -1,9 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+
+import { environment } from '../../../environments/environment';
 
 interface QuizQuestion {
   question: string;
   options: string[];
   correctAnswer: number;
+}
+
+interface QcmResponse {
+  questions: QuizQuestion[];
 }
 
 @Component({
@@ -13,64 +20,55 @@ interface QuizQuestion {
   templateUrl: './revision.component.html',
   styleUrl: './revision.component.scss'
 })
-export class RevisionComponent {
+export class RevisionComponent implements OnInit {
   currentQuestionIndex = 0;
   selectedAnswer: number | null = null;
   showResult = false;
   answers: (number | null)[] = [];
 
-  questions: QuizQuestion[] = [
-    {
-      question: 'Qu’est-ce qu’un modèle de langage (LLM) ?',
-      options: [
-        'Un système capable de traiter et générer du texte',
-        'Un type de base de données relationnelle',
-        'Un protocole réseau',
-        'Un système de fichiers'
-      ],
-      correctAnswer: 0
-    },
-    {
-      question: 'Que signifie RAG ?',
-      options: [
-        'Random Answer Generation',
-        'Retrieval-Augmented Generation',
-        'Real-time AI Generator',
-        'Remote Application Gateway'
-      ],
-      correctAnswer: 1
-    },
-    {
-      question: 'Quel est le rôle d’un embedding ?',
-      options: [
-        'Convertir un texte en représentation vectorielle',
-        'Créer une interface graphique',
-        'Compresser un fichier PDF',
-        'Générer une image'
-      ],
-      correctAnswer: 0
-    },
-    {
-      question: 'Pourquoi utiliser une base vectorielle dans un système RAG ?',
-      options: [
-        'Pour stocker uniquement des images',
-        'Pour rechercher des contenus similaires',
-        'Pour remplacer le frontend',
-        'Pour gérer les utilisateurs'
-      ],
-      correctAnswer: 1
-    },
-    {
-      question: 'Quel est l’objectif principal du contexte dans un système RAG ?',
-      options: [
-        'Fournir au LLM des informations pertinentes pour répondre',
-        'Accélérer uniquement le frontend',
-        'Créer un compte utilisateur',
-        'Modifier automatiquement le modèle'
-      ],
-      correctAnswer: 0
-    }
-  ];
+  questions: QuizQuestion[] = [];
+  loading = false;
+  errorMessage: string | null = null;
+
+  private readonly http = inject(HttpClient);
+
+  ngOnInit(): void {
+    this.loadQuiz();
+  }
+
+  loadQuiz(): void {
+    this.loading = true;
+    this.errorMessage = null;
+    this.questions = [];
+
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders(
+      token ? { Authorization: `Bearer ${token}` } : {}
+    );
+
+    this.http
+      .post<QcmResponse>(
+        `${environment.apiUrl}/agent/qcm`,
+        { course_name: null, num_questions: 5 },
+        { headers }
+      )
+      .subscribe({
+        next: (response) => {
+          this.questions = response.questions;
+          this.loading = false;
+
+          if (this.questions.length === 0) {
+            this.errorMessage = 'Aucune question n’a pu être générée.';
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMessage =
+            err.error?.detail ??
+            'Impossible de générer le quiz. Vérifiez que le serveur est lancé.';
+          this.loading = false;
+        }
+      });
+  }
 
   get currentQuestion(): QuizQuestion {
     return this.questions[this.currentQuestionIndex];
@@ -114,6 +112,7 @@ export class RevisionComponent {
   this.selectedAnswer = null;
   this.showResult = false;
   this.answers = [];
+  this.loadQuiz();
 }
 
   get score(): number {
