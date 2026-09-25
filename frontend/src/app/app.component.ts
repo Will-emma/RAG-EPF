@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
 
@@ -16,4 +16,6 @@ import { SidebarComponent } from './shared/sidebar/sidebar.component';
 })
 export class AppComponent {
   title = 'epf_RAG';
+  private readonly router = inject(Router);
+  get showAppShell(): boolean { return !['/login', '/register'].includes(this.router.url.split('?')[0]); }
 }

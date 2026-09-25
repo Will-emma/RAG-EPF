@@ -46,7 +46,12 @@
   color: #1f2937;
   font-size: 15px;
   font-weight: 500;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
+
+.logout { border: 0; background: transparent; color: #c9151e; font: inherit; cursor: pointer; }
 
 .profile-icon {
   width: 38px;

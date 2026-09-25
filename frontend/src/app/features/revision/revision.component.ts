@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
 
@@ -41,16 +41,10 @@ export class RevisionComponent implements OnInit {
     this.errorMessage = null;
     this.questions = [];
 
-    const token = localStorage.getItem('access_token');
-    const headers = new HttpHeaders(
-      token ? { Authorization: `Bearer ${token}` } : {}
-    );
-
     this.http
       .post<QcmResponse>(
         `${environment.apiUrl}/agent/qcm`,
         { course_name: null, num_questions: 5 },
-        { headers }
       )
       .subscribe({
         next: (response) => {

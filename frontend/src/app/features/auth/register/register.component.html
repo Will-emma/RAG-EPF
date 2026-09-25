@@ -1,0 +1,18 @@
+<section class="auth-card">
+  <h1>Créer un compte</h1>
+  <p>Inscrivez-vous pour retrouver vos cours et révisions.</p>
+  @if (errorMessage) { <div class="error" role="alert">{{ errorMessage }}</div> }
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email" formControlName="email">
+    @if (form.controls.email.touched && form.controls.email.invalid) { <small>Entrez une adresse email valide.</small> }
+    <label for="password">Mot de passe</label>
+    <input id="password" type="password" autocomplete="new-password" formControlName="password">
+    @if (form.controls.password.touched && form.controls.password.invalid) { <small>Le mot de passe doit contenir au moins 8 caractères.</small> }
+    <label for="confirmPassword">Confirmer le mot de passe</label>
+    <input id="confirmPassword" type="password" autocomplete="new-password" formControlName="confirmPassword">
+    @if (form.controls.confirmPassword.touched && !passwordsMatch) { <small>Les mots de passe ne correspondent pas.</small> }
+    <button type="submit" [disabled]="submitting">{{ submitting ? 'Création…' : 'Créer un compte' }}</button>
+  </form>
+  <p class="switch">Déjà inscrit ? <a routerLink="/login">Se connecter</a></p>
+</section>
