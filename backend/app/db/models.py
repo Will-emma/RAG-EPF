@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import ForeignKey, String, Text, DateTime, Integer
+from sqlalchemy import JSON, ForeignKey, String, Text, DateTime, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -48,3 +48,18 @@ class Chunk(Base):
     embedding: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIM))
 
     document: Mapped["Document"] = relationship(back_populates="chunks")
+
+
+class ChatMessage(Base):
+    """Un échange du chat (question + réponse). Les échanges d'une même
+    conversation partagent le même conversation_id (FRONT-5 historique)."""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    conversation_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    question: Mapped[str] = mapped_column(Text)
+    answer: Mapped[str] = mapped_column(Text)
+    sources: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

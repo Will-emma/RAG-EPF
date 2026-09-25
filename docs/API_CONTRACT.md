@@ -71,6 +71,15 @@ triée du plus récent au plus ancien :
 Utile pour la page "Mes cours" (FRONT-3) : afficher cette liste avec un
 badge de statut par document.
 
+### `DELETE /documents/{document_id}`
+Supprime un document de l'utilisateur connecté, ses chunks (le chat et le
+QCM ne l'utilisent plus) et le fichier stocké. L'historique du chat est
+conservé.
+
+**Réponses**
+- `204` → supprimé
+- `404` → document inexistant ou appartenant à un autre utilisateur
+
 ### `GET /search/?q=...&top_k=5` 
 **Réponse `200`** :
 ```json
@@ -92,14 +101,22 @@ Recherche vectorielle limitée aux documents de l'utilisateur connecté
 ### `POST /chat/` 
 **Body**
 ```json
-{ "message": "Qu'est-ce que le deep learning ?", "course_id": null }
+{ "message": "Qu'est-ce que le deep learning ?", "course_id": null, "conversation_id": null }
 ```
+- `conversation_id` (optionnel) : `null` ou absent pour démarrer une
+  nouvelle conversation ; sinon l'identifiant renvoyé par la réponse
+  précédente, pour continuer la même conversation.
+
+Chaque échange (question + réponse + sources) est enregistré dans
+l'historique de l'utilisateur (voir `/history/`).
+
 **Réponses**
 - `200` →
 ```json
 {
   "answer": "Le deep learning est...",
-  "sources": [{ "course": "Deep Learning", "page": 3 }]
+  "sources": [{ "course": "Deep Learning", "page": 3 }],
+  "conversation_id": "cac9d264-68ec-4789-bd2e-d988d5d0e506"
 }
 ```
   Si aucun contenu pertinent n'est trouvé dans les cours de l'utilisateur,
@@ -149,6 +166,51 @@ le Study Agent (LangGraph).
 - `502` → génération impossible (aucun cours importé, ou erreur du
   service IA — rate limit notamment ; `detail` contient un message
   lisible à afficher tel quel)
+
+### `GET /history/`
+Liste les conversations du chat de l'utilisateur connecté, de la plus
+récente à la plus ancienne.
+
+**Réponses**
+- `200` →
+```json
+[
+  {
+    "conversation_id": "cac9d264-68ec-4789-bd2e-d988d5d0e506",
+    "title": "Qu'est-ce que pgvector ?",
+    "last_question": "Et à quoi sert Docker Compose ?",
+    "message_count": 2,
+    "updated_at": "2026-09-25T21:53:36.397280"
+  }
+]
+```
+  `title` = première question de la conversation. Les dates sont en UTC
+  (sans suffixe `Z`).
+
+### `GET /history/{conversation_id}`
+Détail d'une conversation : tous ses échanges, dans l'ordre.
+
+**Réponses**
+- `200` →
+```json
+[
+  {
+    "id": "…",
+    "question": "Qu'est-ce que pgvector ?",
+    "answer": "pgvector est une extension PostgreSQL…",
+    "sources": [{ "course": "cours-ia.pdf", "page": 4 }],
+    "created_at": "2026-09-25T21:53:30.120000"
+  }
+]
+```
+- `404` → conversation inexistante ou appartenant à un autre utilisateur
+
+### `DELETE /history/{conversation_id}`
+Supprime une conversation et tous ses échanges.
+
+**Réponses**
+- `204` → supprimée
+- `404` → conversation inexistante ou appartenant à un autre utilisateur
 
 ---
 
