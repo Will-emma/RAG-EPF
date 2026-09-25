@@ -5,6 +5,7 @@ Deux graphes :
     - qcm  : [START] → identify → query_rag → generate_questions → [END]
 """
 import json
+import random
 import uuid
 
 from langgraph.graph import StateGraph, END
@@ -24,6 +25,13 @@ QCM_SYSTEM_PROMPT = (
     "- \"correctAnswer\" est l'index (0 à 3) de la bonne réponse dans \"options\".\n"
     "- Ne pose des questions que sur des éléments explicitement présents dans le contexte."
 )
+
+# Pour qu'un nouveau QCM ("Recommencer") ne repose pas les mêmes questions :
+# on récupère un large pool de passages puis on en tire QCM_CONTEXT_CHUNKS au hasard
+# à chaque génération (taille du prompt inchangée), avec une température plus élevée.
+QCM_POOL_SIZE = 20
+QCM_CONTEXT_CHUNKS = 8
+QCM_TEMPERATURE = 0.8
 
 
 async def identify_node(state: AgentState, db: AsyncSession) -> AgentState:
@@ -58,6 +66,8 @@ async def generate_questions_node(state: AgentState) -> AgentState:
         state["error"] = state.get("error") or "Aucun contenu de cours trouvé pour générer des questions."
         return state
 
+    if len(chunks) > QCM_CONTEXT_CHUNKS:
+        chunks = random.sample(chunks, QCM_CONTEXT_CHUNKS)
     context = "\n\n---\n\n".join(c["content"] for c in chunks)
     num_questions = state.get("num_questions", 5)
     user_prompt = (
@@ -66,7 +76,7 @@ async def generate_questions_node(state: AgentState) -> AgentState:
     )
 
     try:
-        raw = await call_llm(QCM_SYSTEM_PROMPT, user_prompt, temperature=0.5)
+        raw = await call_llm(QCM_SYSTEM_PROMPT, user_prompt, temperature=QCM_TEMPERATURE)
         questions = json.loads(raw)
         assert isinstance(questions, list)
         for q in questions:
@@ -139,7 +149,7 @@ async def run_qcm_agent(
     user_id: uuid.UUID,
     db: AsyncSession,
     num_questions: int = 5,
-    top_k: int = 8,
+    top_k: int = QCM_POOL_SIZE,
 ) -> AgentState:
     """Point d'entrée pratique pour le graphe QCM."""
     agent = build_qcm_graph(db)
