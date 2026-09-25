@@ -8,18 +8,49 @@ on:
 
 jobs:
   backend:
+
     runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: epf_rag
+          POSTGRES_PASSWORD: change_me
+          POSTGRES_DB: epf_rag_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U epf_rag -d epf_rag_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     defaults:
       run:
         working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - run: pip install -r requirements.txt
+
       - run: pip install ruff && ruff check . || true
-      - run: pytest -q || true
+
+      - name: Enable pgvector extension
+        run: docker exec "${{ job.services.db.id }}" psql -U epf_rag -d epf_rag_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql+asyncpg://epf_rag:change_me@localhost:5432/epf_rag_test
+          JWT_SECRET_KEY: ci-test-secret-key
+          TEST_DATABASE_URL: postgresql+asyncpg://epf_rag:change_me@localhost:5432/epf_rag_test
+        run: pytest -q
 
   frontend:
     runs-on: ubuntu-latest
