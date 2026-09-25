@@ -1,5 +1,8 @@
 <header class="navbar">
+
+  <!-- Logo -->
   <a class="navbar-brand" routerLink="/">
+
     <img
       src="/epf-logo.png"
       alt="EPF Engineering School"
@@ -10,15 +13,38 @@
       <span class="brand-epf">EPF</span>
       <span class="brand-study">Study AI</span>
     </span>
+
   </a>
 
-  <div class="navbar-profile">
-    <div class="profile-icon">
-      
-    </div>
 
-    <span>Mon profil</span>
+  <!-- 已登录 -->
+  @if (isLoggedIn) {
 
-    <span class="profile-arrow">⌄</span>
-  </div>
+    <button
+      type="button"
+      class="navbar-profile"
+      (click)="goToProfile()"
+    >
+
+      <div class="profile-icon">
+        WE
+      </div>
+
+      <span>Mon profil</span>
+
+    </button>
+
+  } @else {
+
+    <!-- 未登录 -->
+    <button
+      type="button"
+      class="login-button"
+      (click)="goToLogin()"
+    >
+      Connexion
+    </button>
+
+  }
+
 </header>

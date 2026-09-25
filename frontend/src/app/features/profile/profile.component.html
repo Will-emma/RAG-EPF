@@ -1,1 +1,237 @@
-<p>profile works!</p>
+<section class="profile-page">
+
+  <!-- Header -->
+  <header class="profile-header">
+    <div>
+      <span class="page-label">EPF STUDY AI</span>
+
+      <h1>Profil</h1>
+
+      <p>
+        Gérez vos informations personnelles et votre activité
+        d’apprentissage.
+      </p>
+    </div>
+  </header>
+
+
+  <!-- Main profile section -->
+  <div class="profile-layout">
+
+    <!-- User card -->
+    <section class="profile-card user-card">
+
+      <div class="avatar">
+        {{ user.initials }}
+      </div>
+
+      @if (!isEditing) {
+
+        <h2>{{ user.name }}</h2>
+
+        <p class="user-role">
+          Étudiant EPF
+        </p>
+
+        <button
+          type="button"
+          class="edit-button"
+          (click)="startEditing()"
+        >
+          Modifier le profil
+        </button>
+
+      } @else {
+
+        <h2>Modifier le profil</h2>
+
+        <p class="user-role">
+          Modifiez vos informations
+        </p>
+
+      }
+
+    </section>
+
+
+    <!-- Personal information -->
+    <section class="profile-card information-card">
+
+      <div class="card-header">
+        <h2>Informations personnelles</h2>
+      </div>
+
+
+      @if (!isEditing) {
+
+        <div class="information-grid">
+
+          <div class="information-item">
+            <span>Nom</span>
+            <strong>{{ user.name }}</strong>
+          </div>
+
+          <div class="information-item">
+            <span>Email</span>
+            <strong>{{ user.email }}</strong>
+          </div>
+
+          <div class="information-item">
+            <span>École</span>
+            <strong>{{ user.school }}</strong>
+          </div>
+
+          <div class="information-item">
+            <span>Formation</span>
+            <strong>{{ user.program }}</strong>
+          </div>
+
+          <div class="information-item">
+            <span>Année</span>
+            <strong>{{ user.year }}</strong>
+          </div>
+
+        </div>
+
+      } @else {
+
+        <!-- Edit form -->
+        <div class="edit-form">
+
+          <label>
+            Nom
+
+            <input
+              type="text"
+              [(ngModel)]="editUser.name"
+            />
+          </label>
+
+
+          <label>
+            Email
+
+            <input
+              type="email"
+              [(ngModel)]="editUser.email"
+            />
+          </label>
+
+
+          <label>
+            École
+
+            <input
+              type="text"
+              [(ngModel)]="editUser.school"
+            />
+          </label>
+
+
+          <label>
+            Formation
+
+            <input
+              type="text"
+              [(ngModel)]="editUser.program"
+            />
+          </label>
+
+
+          <label>
+            Année
+
+            <input
+              type="text"
+              [(ngModel)]="editUser.year"
+            />
+          </label>
+
+
+          <!-- Buttons -->
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="cancelEditing()"
+            >
+              Annuler
+            </button>
+
+            <button
+              type="button"
+              class="save-button"
+              (click)="saveProfile()"
+            >
+              Enregistrer
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+
+  <!-- Statistics -->
+  <section class="profile-card statistics-card">
+
+    <div class="card-header">
+
+      <h2>Mon activité</h2>
+
+      <span>EPF Study AI</span>
+
+    </div>
+
+
+    <div class="statistics-grid">
+
+      <div class="stat-item">
+
+        <strong>
+          {{ stats.conversations }}
+        </strong>
+
+        <span>
+          Conversations
+        </span>
+
+      </div>
+
+
+      <div class="stat-item">
+
+        <strong>
+          {{ stats.quizzes }}
+        </strong>
+
+        <span>
+          QCM réalisés
+        </span>
+
+      </div>
+
+
+      <div class="stat-item">
+
+        <strong>
+          {{ stats.successRate }}%
+        </strong>
+
+        <span>
+          Taux de réussite
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</section>
