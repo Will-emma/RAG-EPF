@@ -1,1 +1,114 @@
-<p>history works!</p>
+<section class="history-page">
+
+  <header class="history-header">
+    <div>
+      <span class="page-label">EPF STUDY AI</span>
+      <h1>Historique</h1>
+      <p>Retrouvez vos précédentes conversations avec EPF Study IA.</p>
+    </div>
+  </header>
+
+  <div class="history-layout">
+
+    <div class="history-list">
+
+      <div class="history-list-header">
+        <h2>Mes conversations</h2>
+        <span>{{ conversations.length }} conversations</span>
+      </div>
+
+      @if (conversations.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">↶</div>
+          <h3>Aucune conversation</h3>
+          <p>
+            Vos conversations avec l’assistant apparaîtront ici.
+          </p>
+        </div>
+      }
+
+      @for (conversation of conversations; track conversation.id) {
+        <div
+          class="conversation-card"
+          [class.selected]="selectedConversation?.id === conversation.id"
+          (click)="selectConversation(conversation)"
+        >
+
+          <div class="conversation-icon">
+            ◌
+          </div>
+
+          <div class="conversation-content">
+            <h3>{{ conversation.title }}</h3>
+
+            <p>{{ conversation.preview }}</p>
+
+            <div class="conversation-meta">
+              <span>{{ conversation.date }}</span>
+              <span>·</span>
+              <span>{{ conversation.messageCount }} messages</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="delete-button"
+            (click)="deleteConversation(conversation.id); $event.stopPropagation()"
+            aria-label="Supprimer la conversation"
+          >
+            ×
+          </button>
+
+        </div>
+      }
+
+    </div>
+
+    <aside class="history-detail">
+
+      @if (selectedConversation) {
+
+        <div class="detail-header">
+          <span class="detail-label">CONVERSATION</span>
+          <h2>{{ selectedConversation.title }}</h2>
+          <span class="detail-date">
+            {{ selectedConversation.date }}
+          </span>
+        </div>
+
+        <div class="detail-content">
+
+          <div class="detail-message user-message">
+            <span class="message-label">Vous</span>
+            <p>{{ selectedConversation.preview }}</p>
+          </div>
+
+          <div class="detail-message assistant-message">
+            <span class="message-label">EPF Study IA</span>
+            <p>
+              Cette conversation sera affichée ici lorsque
+              l’historique sera connecté au backend.
+            </p>
+          </div>
+
+        </div>
+
+      } @else {
+
+        <div class="detail-empty">
+          <div class="detail-empty-icon">◌</div>
+
+          <h3>Sélectionnez une conversation</h3>
+
+          <p>
+            Cliquez sur une conversation pour afficher son contenu.
+          </p>
+        </div>
+
+      }
+
+    </aside>
+
+  </div>
+
+</section>
