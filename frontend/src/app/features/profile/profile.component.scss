@@ -1,0 +1,23 @@
+.profile-page { max-width: 1080px; margin: 0 auto; }
+.page-heading { margin: 8px 0 30px; }
+.eyebrow { color: #d71920; font-size: 12px; font-weight: 800; letter-spacing: 1.4px; }
+.page-heading h1 { margin: 8px 0; color: #1f2937; font-size: clamp(28px, 4vw, 36px); }
+.page-heading p { margin: 0; color: #5b6574; line-height: 1.6; }
+.profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.profile-card { min-width: 0; padding: 26px; border: 1px solid #f1dfe1; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(180, 20, 30, .05); }
+.card-heading { display: flex; align-items: flex-start; gap: 14px; }
+.card-icon { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: 13px; background: #fff0f1; color: #d71920; font-size: 21px; font-weight: 700; }
+.security-icon { background: #eef8f1; color: #26834a; }
+.card-heading h2 { margin: 2px 0 5px; color: #263548; font-size: 18px; }
+.card-heading p { margin: 0; color: #667085; font-size: 14px; line-height: 1.5; }
+.field-group { display: grid; gap: 8px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f3f5; }
+.field-label { color: #667085; font-size: 13px; font-weight: 600; }
+.field-value { overflow-wrap: anywhere; color: #263548; font-size: 16px; font-weight: 600; }
+.field-value.unavailable { color: #667085; font-weight: 500; }
+.hint { margin: 0; color: #667085; font-size: 13px; line-height: 1.5; }
+.session-status { display: flex; align-items: center; gap: 9px; margin: 28px 0 22px; color: #263548; font-size: 14px; font-weight: 600; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #2f9e5b; box-shadow: 0 0 0 4px #e8f6ed; }
+.logout-button { width: 100%; padding: 12px 18px; border: 0; border-radius: 10px; background: #d71920; color: #fff; font: inherit; font-weight: 700; cursor: pointer; transition: background .2s ease; }
+.logout-button:hover { background: #b9141b; }
+.logout-button:focus-visible { outline: 3px solid #f3a1a5; outline-offset: 2px; }
+@media (max-width: 720px) { .profile-grid { grid-template-columns: 1fr; } .profile-card { padding: 22px; } }

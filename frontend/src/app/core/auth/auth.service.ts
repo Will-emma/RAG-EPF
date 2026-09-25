@@ -13,13 +13,18 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly storageKey = 'access_token';
+  private readonly emailStorageKey = 'user_email';
 
   get token(): string | null { return localStorage.getItem(this.storageKey); }
+  get userEmail(): string | null { return localStorage.getItem(this.emailStorageKey); }
   get isAuthenticated(): boolean { return this.token !== null; }
 
   login(credentials: Credentials): Observable<AuthToken> {
     return this.http.post<AuthToken>(`${environment.apiUrl}/auth/login`, credentials).pipe(
-      tap((response) => localStorage.setItem(this.storageKey, response.access_token))
+      tap((response) => {
+        localStorage.setItem(this.storageKey, response.access_token);
+        localStorage.setItem(this.emailStorageKey, credentials.email);
+      })
     );
   }
 
@@ -29,6 +34,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.storageKey);
+    localStorage.removeItem(this.emailStorageKey);
     void this.router.navigate(['/login']);
   }
 }
