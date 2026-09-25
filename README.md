@@ -16,11 +16,11 @@ pour le détail des endpoints.
 |---|---|---|
 | Inscription / connexion | ✅ | JWT stocké dans `localStorage`, ajouté automatiquement aux appels API par un interceptor. Routes protégées par un guard. |
 | Déconnexion | ✅ | Bouton dans la barre du haut (avec l'email connecté) et sur la page Profil. Session expirée (401) → retour automatique au login. |
-| Mes cours | ✅ | Import de PDF / PPTX / DOCX (25 Mo max), découpage + embeddings côté backend, liste des documents avec leur statut (Prêt, En traitement, Erreur). |
+| Mes cours | ✅ | Import de PDF / PPTX / DOCX (25 Mo max), découpage + embeddings côté backend, liste des documents avec leur statut (Prêt, En traitement, Erreur), suppression d'un cours (il n'est alors plus utilisé par le chat ni le QCM). |
 | Chat IA | ✅ | Réponses générées à partir de vos cours, avec les sources (cours + page). |
 | Révision / QCM | ✅ | Quiz de 5 questions généré par l'agent LangGraph à partir de vos cours. |
 | Profil | ✅ | Email du compte connecté + déconnexion. |
-| Historique | 🚧 | Maquette : les conversations affichées sont des exemples, pas encore branchées sur l'API. |
+| Historique | ✅ | Chaque échange du chat est enregistré ; la page Historique liste les conversations, affiche leur contenu (réponses + sources), permet de les supprimer ou de les continuer dans le chat. Chaque utilisateur ne voit que les siennes. |
 
 ## Stack
 
@@ -84,9 +84,12 @@ Frontend sur http://localhost:4200
 3. Se connecter → l'email apparaît en haut à droite avec le bouton **Déconnexion**.
 4. **Mes cours** → sélectionner un PDF / PPTX / DOCX → **Télécharger le document**
    → le document apparaît dans « Mes documents » avec le statut **Prêt**.
+   Le bouton **Supprimer** retire un cours (après confirmation).
 5. **Chat IA** → poser une question sur le cours → réponse + cartes de sources.
 6. **Révision / QCM** → le quiz est généré à partir des cours importés
    (compter 10 à 20 secondes).
+7. **Historique** → la conversation du chat apparaît ; cliquer dessus affiche
+   les échanges, **Continuer dans le chat** permet de reprendre la discussion.
 
 Un compte sans document importé obtient « Je n'ai trouvé aucun contenu dans vos
 cours… » dans le chat et une erreur dans le QCM : c'est normal, il faut d'abord
@@ -105,9 +108,9 @@ frontend/src/
       chat/          # Chat IA
       documents/     # Mes cours (upload + liste)
       revision/      # Révision / QCM
-      history/       # Historique (maquette)
+      history/       # Historique des conversations
       profile/       # Profil
-    shared/          # navbar, sidebar
+    shared/          # navbar, sidebar, mise en forme des réponses (chat-format.ts)
 ```
 
 L'URL de l'API est définie dans `frontend/src/environments/environment.ts` :
@@ -120,6 +123,23 @@ export const environment = {
 ```
 
 Tests unitaires : `cd frontend && npm test` (Karma + Chrome).
+
+## Tests backend
+
+Les tests Pytest (`backend/tests/`) utilisent une base **séparée**
+`epf_rag_test` : ils suppriment toutes les tables à la fin, ne les lancez
+jamais sur la base principale. Création de la base de test (une seule fois) :
+
+```bash
+docker exec epf_rag_db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "CREATE DATABASE epf_rag_test"'
+docker exec epf_rag_db sh -c 'psql -U "$POSTGRES_USER" -d epf_rag_test -c "CREATE EXTENSION IF NOT EXISTS vector"'
+```
+
+Lancement (l'URL de test reprend les identifiants de votre `.env`) :
+
+```bash
+docker exec epf_rag_backend sh -c 'TEST_DATABASE_URL="${DATABASE_URL%/*}/epf_rag_test" python -m pytest -q'
+```
 
 ## Choisir le modèle LLM
 

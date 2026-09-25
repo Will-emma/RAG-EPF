@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
+import { parseApiDate } from '../../shared/chat-format';
 
 interface CourseDocument {
   id: string;
@@ -29,6 +30,7 @@ export class DocumentsComponent implements OnInit {
   documents: CourseDocument[] = [];
   isLoadingDocuments = false;
   documentsError = '';
+  deletingId: string | null = null;
 
   readonly statusLabels: Record<string, string | undefined> = {
     uploaded: 'Importé',
@@ -36,6 +38,8 @@ export class DocumentsComponent implements OnInit {
     ready: 'Prêt',
     error: 'Erreur'
   };
+
+  readonly parseApiDate = parseApiDate;
 
   private readonly http = inject(HttpClient);
 
@@ -64,6 +68,34 @@ export class DocumentsComponent implements OnInit {
         this.documentsError =
           this.getDetail(error) ?? 'Impossible de charger vos documents.';
         this.isLoadingDocuments = false;
+      }
+    });
+  }
+
+  deleteDocument(document: CourseDocument): void {
+    if (this.deletingId) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Supprimer « ${document.filename} » ? Le chat et les quiz ne l'utiliseront plus.`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingId = document.id;
+    this.documentsError = '';
+
+    this.http.delete(`${environment.apiUrl}/documents/${document.id}`).subscribe({
+      next: () => {
+        this.documents = this.documents.filter((item) => item.id !== document.id);
+        this.deletingId = null;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.documentsError =
+          this.getDetail(error) ?? 'La suppression du document a échoué. Réessayez.';
+        this.deletingId = null;
       }
     });
   }

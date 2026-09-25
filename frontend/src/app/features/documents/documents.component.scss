@@ -210,6 +210,10 @@
   .remove-button {
     width: 100%;
   }
+
+  .document-item {
+    flex-wrap: wrap;
+  }
 }
 
 .error-message {
@@ -325,4 +329,13 @@
 .status-error {
   background: #fef3f2;
   color: #b42318;
+}
+
+.document-item .remove-button {
+  flex-shrink: 0;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }

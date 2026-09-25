@@ -1,7 +1,8 @@
+import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -94,3 +95,32 @@ async def list_documents(
         .order_by(Document.created_at.desc())
     )
     return result.scalars().all()
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Supprime un document de l'utilisateur, ses chunks (le chat et le QCM ne
+    l'utilisent plus) et le fichier stocké. L'historique du chat est conservé."""
+    result = await db.execute(
+        select(Document).where(
+            Document.id == document_id,
+            Document.owner_id == current_user.id,
+        )
+    )
+    document = result.scalar_one_or_none()
+    if document is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document introuvable.")
+
+    await db.execute(delete(Chunk).where(Chunk.document_id == document.id))
+    await db.execute(delete(Document).where(Document.id == document.id))
+    await db.commit()
+
+    # Le fichier est stocké sous "<id>.<extension>" (voir upload_document)
+    for stored_file in UPLOAD_DIR.glob(f"{document_id}.*"):
+        stored_file.unlink(missing_ok=True)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
