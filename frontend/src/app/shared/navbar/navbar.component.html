@@ -12,4 +12,12 @@
     </span>
   </a>
 
+  @if (auth.isAuthenticated) {
+    <div class="navbar-user">
+      @if (auth.userEmail; as email) {
+        <a class="user-email" routerLink="/profile">{{ email }}</a>
+      }
+      <button type="button" class="logout-button" (click)="auth.logout()">Déconnexion</button>
+    </div>
+  }
 </header>

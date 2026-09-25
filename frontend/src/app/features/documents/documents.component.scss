@@ -210,8 +210,9 @@
   .remove-button {
     width: 100%;
   }
+}
 
-  .error-message {
+.error-message {
   margin: 14px 0 0;
   color: #d71920;
   font-size: 13px;
@@ -267,4 +268,61 @@
   color: #287a3d;
 }
 
+.documents-list {
+  max-width: 850px;
+  margin: 32px auto 0;
+
+  h2 {
+    margin: 0 0 14px;
+    color: #1f2937;
+    font-size: 21px;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.list-info {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #f1dfe1;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.status-badge {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-ready {
+  background: #edf8f0;
+  color: #287a3d;
+}
+
+.status-uploaded,
+.status-processing {
+  background: #fff4e5;
+  color: #a15c00;
+}
+
+.status-error {
+  background: #fef3f2;
+  color: #b42318;
 }

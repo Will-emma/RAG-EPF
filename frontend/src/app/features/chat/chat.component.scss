@@ -54,6 +54,7 @@
 }
 
 .message-content {
+  white-space: pre-line;
   padding: 14px 18px;
   border-radius: 16px;
   line-height: 1.55;
@@ -108,6 +109,11 @@
 .source-page {
   color: #7b8491;
   font-size: 12px;
+}
+
+.assistant-message .error-message {
+  background: #fef3f2;
+  color: #b42318;
 }
 
 .loading-message {

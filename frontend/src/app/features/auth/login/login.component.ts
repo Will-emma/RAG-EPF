@@ -13,6 +13,7 @@ export class LoginComponent {
   readonly form = this.fb.nonNullable.group({ email: ['', [Validators.required, Validators.email]], password: ['', Validators.required] });
   errorMessage = '';
   submitting = false;
+  readonly justRegistered = this.route.snapshot.queryParamMap.get('registered') === 'true';
 
   submit(): void {
     this.errorMessage = '';

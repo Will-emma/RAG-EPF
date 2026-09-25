@@ -1,18 +1,43 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+
+import { environment } from '../../../environments/environment';
+
+interface CourseDocument {
+  id: string;
+  filename: string;
+  course_name: string | null;
+  status: string;
+  created_at: string;
+}
 
 @Component({
   selector: 'app-documents',
   standalone: true,
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './documents.component.html',
   styleUrl: './documents.component.scss'
 })
-export class DocumentsComponent {
+export class DocumentsComponent implements OnInit {
   selectedFile: File | null = null;
   isDragging = false;
   isUploading = false;
   uploadSuccess = false;
   errorMessage = '';
+
+  documents: CourseDocument[] = [];
+  isLoadingDocuments = false;
+  documentsError = '';
+
+  readonly statusLabels: Record<string, string | undefined> = {
+    uploaded: 'Importé',
+    processing: 'En traitement',
+    ready: 'Prêt',
+    error: 'Erreur'
+  };
+
+  private readonly http = inject(HttpClient);
 
   private readonly allowedTypes = [
     'application/pdf',
@@ -21,6 +46,27 @@ export class DocumentsComponent {
   ];
 
   private readonly maxFileSize = 25 * 1024 * 1024;
+
+  ngOnInit(): void {
+    this.loadDocuments();
+  }
+
+  loadDocuments(): void {
+    this.isLoadingDocuments = true;
+    this.documentsError = '';
+
+    this.http.get<CourseDocument[]>(`${environment.apiUrl}/documents/`).subscribe({
+      next: (documents) => {
+        this.documents = documents;
+        this.isLoadingDocuments = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.documentsError =
+          this.getDetail(error) ?? 'Impossible de charger vos documents.';
+        this.isLoadingDocuments = false;
+      }
+    });
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -77,15 +123,36 @@ export class DocumentsComponent {
     this.uploadSuccess = false;
     this.isUploading = true;
 
-    setTimeout(() => {
-      this.isUploading = false;
-      this.uploadSuccess = true;
-    }, 1500);
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http
+      .post<CourseDocument>(`${environment.apiUrl}/documents/upload`, formData)
+      .subscribe({
+        next: () => {
+          this.isUploading = false;
+          this.uploadSuccess = true;
+          this.loadDocuments();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            this.getDetail(error) ??
+            (error.status === 0
+              ? 'Impossible de joindre le serveur. Vérifiez qu’il est lancé.'
+              : 'L’import du document a échoué. Réessayez.');
+          this.isUploading = false;
+        }
+      });
   }
 
   removeFile(): void {
     this.selectedFile = null;
     this.errorMessage = '';
     this.uploadSuccess = false;
+  }
+
+  private getDetail(error: HttpErrorResponse): string | null {
+    const detail: unknown = error.error?.detail;
+    return typeof detail === 'string' ? detail : null;
   }
 }
