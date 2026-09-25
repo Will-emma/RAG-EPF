@@ -1,65 +1,140 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 
-interface ChatHistory {
-  id: number;
+import { environment } from '../../../environments/environment';
+import { TextSegment, parseApiDate, toSegments } from '../../shared/chat-format';
+
+interface ConversationSummary {
+  conversation_id: string;
+  title: string;
+  last_question: string;
+  message_count: number;
+  updated_at: string;
+}
+
+interface HistorySource {
+  course: string | null;
+  page: number | null;
+}
+
+interface HistoryMessage {
+  id: string;
+  question: string;
+  answer: string;
+  sources: HistorySource[];
+  created_at: string;
+}
+
+interface Conversation {
+  id: string;
   title: string;
   preview: string;
-  date: string;
+  date: Date;
   messageCount: number;
+}
+
+interface Exchange {
+  id: string;
+  question: string;
+  answer: TextSegment[];
+  sources: HistorySource[];
 }
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [],
+  imports: [DatePipe, RouterLink],
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss'
 })
-export class HistoryComponent {
-  selectedConversation: ChatHistory | null = null;
+export class HistoryComponent implements OnInit {
+  conversations: Conversation[] = [];
+  isLoading = false;
+  errorMessage = '';
 
-  conversations: ChatHistory[] = [
-    {
-      id: 1,
-      title: 'Comprendre le RAG',
-      preview: 'Peux-tu m’expliquer le fonctionnement du RAG ?',
-      date: 'Aujourd’hui, 10:32',
-      messageCount: 8
-    },
-    {
-      id: 2,
-      title: 'Les embeddings',
-      preview: 'Quelle est la différence entre un embedding et un token ?',
-      date: 'Hier, 16:45',
-      messageCount: 6
-    },
-    {
-      id: 3,
-      title: 'Préparation examen IA',
-      preview: 'Quels sont les concepts importants à retenir ?',
-      date: '20 sept. 2026, 14:20',
-      messageCount: 12
-    },
-    {
-      id: 4,
-      title: 'Architecture chatbot',
-      preview: 'Comment fonctionne l’architecture d’un chatbot RAG ?',
-      date: '19 sept. 2026, 11:08',
-      messageCount: 10
-    }
-  ];
+  selectedConversation: Conversation | null = null;
+  exchanges: Exchange[] = [];
+  isLoadingDetail = false;
+  detailError = '';
 
-  selectConversation(conversation: ChatHistory): void {
-    this.selectedConversation = conversation;
+  private readonly http = inject(HttpClient);
+
+  ngOnInit(): void {
+    this.loadConversations();
   }
 
-  deleteConversation(id: number): void {
-    this.conversations = this.conversations.filter(
-      conversation => conversation.id !== id
-    );
+  loadConversations(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
 
-    if (this.selectedConversation?.id === id) {
-      this.selectedConversation = null;
-    }
+    this.http.get<ConversationSummary[]>(`${environment.apiUrl}/history/`).subscribe({
+      next: (summaries) => {
+        this.conversations = summaries.map((summary) => ({
+          id: summary.conversation_id,
+          title: summary.title,
+          preview: summary.last_question,
+          date: parseApiDate(summary.updated_at),
+          messageCount: summary.message_count
+        }));
+        this.isLoading = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = this.getDetail(error) ?? 'Impossible de charger votre historique.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  selectConversation(conversation: Conversation): void {
+    this.selectedConversation = conversation;
+    this.exchanges = [];
+    this.detailError = '';
+    this.isLoadingDetail = true;
+
+    this.http
+      .get<HistoryMessage[]>(`${environment.apiUrl}/history/${conversation.id}`)
+      .subscribe({
+        next: (messages) => {
+          // Ignore une réponse arrivée après un clic sur une autre conversation
+          if (this.selectedConversation?.id !== conversation.id) return;
+          this.exchanges = messages.map((message) => ({
+            id: message.id,
+            question: message.question,
+            answer: toSegments(message.answer),
+            sources: message.sources
+          }));
+          this.isLoadingDetail = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          if (this.selectedConversation?.id !== conversation.id) return;
+          this.detailError = this.getDetail(error) ?? 'Impossible de charger cette conversation.';
+          this.isLoadingDetail = false;
+        }
+      });
+  }
+
+  deleteConversation(id: string): void {
+    this.http.delete(`${environment.apiUrl}/history/${id}`).subscribe({
+      next: () => {
+        this.conversations = this.conversations.filter(
+          conversation => conversation.id !== id
+        );
+
+        if (this.selectedConversation?.id === id) {
+          this.selectedConversation = null;
+          this.exchanges = [];
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = this.getDetail(error) ?? 'La suppression a échoué. Réessayez.';
+      }
+    });
+  }
+
+  private getDetail(error: HttpErrorResponse): string | null {
+    const detail: unknown = error.error?.detail;
+    return typeof detail === 'string' ? detail : null;
   }
 }

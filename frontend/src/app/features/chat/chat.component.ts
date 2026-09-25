@@ -1,17 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
+import { TextSegment, toSegments } from '../../shared/chat-format';
 
 interface ChatSource {
   course: string | null;
   page: number | null;
-}
-
-interface TextSegment {
-  text: string;
-  bold: boolean;
 }
 
 interface ChatMessage {
@@ -23,7 +21,17 @@ interface ChatMessage {
 interface ChatResponse {
   answer: string;
   sources: ChatSource[];
+  conversation_id: string;
 }
+
+interface HistoryMessage {
+  question: string;
+  answer: string;
+  sources: ChatSource[];
+}
+
+const WELCOME_MESSAGE =
+  'Bonjour ! Posez-moi une question sur les cours que vous avez importés dans « Mes cours ».';
 
 @Component({
   selector: 'app-chat',
@@ -32,21 +40,34 @@ interface ChatResponse {
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
   userInput = '';
   isLoading = false;
   errorMessage = '';
 
-  messages: ChatMessage[] = [
-    {
-      role: 'assistant',
-      segments: toSegments(
-        'Bonjour ! Posez-moi une question sur les cours que vous avez importés dans « Mes cours ».'
-      )
-    }
-  ];
+  messages: ChatMessage[] = [];
+
+  // null = nouvelle conversation (le backend en crée une au premier message)
+  private conversationId: string | null = null;
 
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngOnInit(): void {
+    // /chat?conversation=<id> reprend une conversation de l'historique ;
+    // /chat tout court démarre une nouvelle conversation.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const conversationId = params.get('conversation');
+        if (conversationId) {
+          this.loadConversation(conversationId);
+        } else {
+          this.startNewConversation();
+        }
+      });
+  }
 
   sendMessage(): void {
     const content = this.userInput.trim();
@@ -68,10 +89,12 @@ export class ChatComponent {
     this.http
       .post<ChatResponse>(`${environment.apiUrl}/chat/`, {
         message: content,
-        course_id: null
+        course_id: null,
+        conversation_id: this.conversationId
       })
       .subscribe({
         next: (response) => {
+          this.conversationId = response.conversation_id;
           this.messages.push({
             role: 'assistant',
             segments: toSegments(response.answer),
@@ -80,30 +103,49 @@ export class ChatComponent {
           this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
-          const detail: unknown = error.error?.detail;
           this.errorMessage =
-            typeof detail === 'string'
-              ? detail
-              : error.status === 0
-                ? 'Impossible de joindre le serveur. Vérifiez qu’il est lancé.'
-                : 'Le chat n’a pas pu répondre. Réessayez dans un instant.';
+            this.getDetail(error) ??
+            (error.status === 0
+              ? 'Impossible de joindre le serveur. Vérifiez qu’il est lancé.'
+              : 'Le chat n’a pas pu répondre. Réessayez dans un instant.');
           this.isLoading = false;
         }
       });
   }
-}
 
-// Le LLM répond en Markdown : on retire les lignes vides autour de la réponse,
-// on remplace les puces "* " / "- " par "• ", on retire les marqueurs d'*italique*
-// et on découpe le **gras** en segments
-// (affichés via interpolation, donc échappés : pas d'innerHTML).
-function toSegments(text: string): TextSegment[] {
-  const cleaned = text
-    .trim()
-    .replace(/^[ \t]*[*-][ \t]+/gm, '• ')
-    .replace(/(^|[^*])\*(?![\s*])([^*\n]+?)(?<!\s)\*(?!\*)/g, '$1$2');
-  return cleaned
-    .split(/\*\*(.+?)\*\*/s)
-    .map((part, index) => ({ text: part, bold: index % 2 === 1 }))
-    .filter((segment) => segment.text !== '');
+  private startNewConversation(): void {
+    this.conversationId = null;
+    this.errorMessage = '';
+    this.messages = [{ role: 'assistant', segments: toSegments(WELCOME_MESSAGE) }];
+  }
+
+  private loadConversation(conversationId: string): void {
+    this.errorMessage = '';
+    this.messages = [];
+    this.isLoading = true;
+
+    this.http
+      .get<HistoryMessage[]>(`${environment.apiUrl}/history/${conversationId}`)
+      .subscribe({
+        next: (history) => {
+          this.conversationId = conversationId;
+          this.messages = history.flatMap((exchange): ChatMessage[] => [
+            { role: 'user', segments: toSegments(exchange.question) },
+            { role: 'assistant', segments: toSegments(exchange.answer), sources: exchange.sources }
+          ]);
+          this.isLoading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.startNewConversation();
+          this.errorMessage =
+            this.getDetail(error) ?? 'Impossible de charger cette conversation.';
+          this.isLoading = false;
+        }
+      });
+  }
+
+  private getDetail(error: HttpErrorResponse): string | null {
+    const detail: unknown = error.error?.detail;
+    return typeof detail === 'string' ? detail : null;
+  }
 }
