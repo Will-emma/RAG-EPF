@@ -48,7 +48,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   # Le frontend Angular tourne en local avec `ng serve` pendant le dev
-  # (voir frontend/README.md). Décommentez ce service une fois l'app
+  # (voir README.md à la racine). Décommentez ce service une fois l'app
   # buildée si vous voulez la conteneuriser pour la démo / le déploiement.
   # frontend:
   #   build: ./frontend
