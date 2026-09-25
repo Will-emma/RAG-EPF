@@ -1,0 +1,11 @@
+.auth-card { width: min(100%, 440px); margin: 7vh auto; padding: 36px; background: white; border: 1px solid #f1dfe1; border-radius: 18px; box-shadow: 0 12px 36px #6b15200d; }
+h1 { margin: 0 0 8px; color: #263548; } p { color: #667085; }
+form { display: grid; gap: 10px; margin-top: 26px; }
+label { color: #263548; font-weight: 600; }
+input { padding: 12px 14px; border: 1px solid #d0d5dd; border-radius: 9px; font: inherit; }
+button { margin-top: 12px; padding: 13px; border: 0; border-radius: 9px; background: #d71920; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: .65; cursor: wait; }
+small, .error { color: #b42318; }
+.error { margin: 16px 0; padding: 12px; background: #fef3f2; border-radius: 8px; }
+.switch { margin: 22px 0 0; text-align: center; }
+a { color: #c9151e; font-weight: 600; }

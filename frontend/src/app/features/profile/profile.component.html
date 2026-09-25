@@ -1,1 +1,43 @@
-<p>profile works!</p>
+<section class="profile-page">
+  <header class="page-heading">
+    <span class="eyebrow">COMPTE</span>
+    <h1>Mon profil</h1>
+    <p>Consultez les informations disponibles sur votre compte et gérez votre session.</p>
+  </header>
+
+  <div class="profile-grid">
+    <article class="profile-card account-card">
+      <div class="card-heading">
+        <div class="card-icon" aria-hidden="true">&#64;</div>
+        <div>
+          <h2>Informations du compte</h2>
+          <p>Informations disponibles depuis votre connexion.</p>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Adresse email</span>
+        @if (auth.userEmail; as email) {
+          <span class="field-value">{{ email }}</span>
+        } @else {
+          <span class="field-value unavailable">Indisponible pour cette session</span>
+          <p class="hint">Reconnectez-vous pour actualiser les informations de votre compte.</p>
+        }
+      </div>
+    </article>
+
+    <article class="profile-card session-card">
+      <div class="card-heading">
+        <div class="card-icon security-icon" aria-hidden="true">✓</div>
+        <div>
+          <h2>Sécurité et session</h2>
+          <p>Votre session permet l’accès à vos espaces personnels.</p>
+        </div>
+      </div>
+      <div class="session-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Session connectée</span>
+      </div>
+      <button class="logout-button" type="button" (click)="auth.logout()">Se déconnecter</button>
+    </article>
+  </div>
+</section>
