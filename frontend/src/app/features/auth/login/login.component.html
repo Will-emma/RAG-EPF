@@ -1,6 +1,7 @@
 <section class="auth-card">
   <h1>Connexion</h1>
   <p>Connectez-vous à votre espace EPF Study IA.</p>
+  @if (justRegistered && !errorMessage) { <div class="success" role="status">Compte créé, vous pouvez vous connecter.</div> }
   @if (errorMessage) { <div class="error" role="alert">{{ errorMessage }}</div> }
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <label for="email">Email</label>

@@ -39,7 +39,48 @@
   color: #1f2937;
 }
 
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.user-email {
+  overflow: hidden;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: #d71920;
+  }
+}
+
+.logout-button {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: 1px solid #f1dfe1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #d71920;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff1f2;
+  }
+}
+
 @media (max-width: 768px) {
+  .user-email {
+    display: none;
+  }
+
   .navbar {
     height: 82px;
     padding: 0 16px;

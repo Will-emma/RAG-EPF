@@ -5,21 +5,18 @@
       [class.user-message]="message.role === 'user'"
       [class.assistant-message]="message.role === 'assistant'"
     >
-      <div class="message-content">
-        {{ message.content }}
-      </div>
+      <div class="message-content">@for (segment of message.segments; track $index) {@if (segment.bold) {<strong>{{ segment.text }}</strong>} @else {{{ segment.text }}}}</div>
 
-      @if (message.role === 'assistant') {
+      @if (message.sources?.length) {
         <div class="sources">
-          <div class="source-card">
-            <span class="source-course">Cours IA générative</span>
-            <span class="source-page">Page 12</span>
-          </div>
-
-          <div class="source-card">
-            <span class="source-course">Cours Chatbot</span>
-            <span class="source-page">Page 18</span>
-          </div>
+          @for (source of message.sources; track $index) {
+            <div class="source-card">
+              <span class="source-course">{{ source.course ?? 'Document' }}</span>
+              @if (source.page !== null) {
+                <span class="source-page">Page {{ source.page }}</span>
+              }
+            </div>
+          }
         </div>
       }
     </div>
@@ -27,9 +24,13 @@
 
   @if (isLoading) {
     <div class="message assistant-message">
-      <div class="message-content loading-message">
-        Analyse de votre question...
-      </div>
+      <div class="message-content loading-message">En train de répondre...</div>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="message assistant-message">
+      <div class="message-content error-message" role="alert">{{ errorMessage }}</div>
     </div>
   }
 </div>
