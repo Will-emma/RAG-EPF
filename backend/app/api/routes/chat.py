@@ -60,6 +60,13 @@ async def chat(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Erreur du service IA ({exc.response.status_code}). Réessayez plus tard.",
             )
+        except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError):
+            # Connexion coupée par le fournisseur, service injoignable, ou réponse
+            # sans contenu exploitable : sans ce cas, le chat renverrait une 500.
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Le service IA n'a pas pu répondre. Réessayez dans un instant.",
+            )
 
         seen = set()
         sources = []
