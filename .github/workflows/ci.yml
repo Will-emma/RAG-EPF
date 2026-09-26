@@ -77,6 +77,9 @@ jobs:
         if: steps.check.outputs.exists == 'true'
       - run: npm ci
         if: steps.check.outputs.exists == 'true'
+      - name: Run frontend tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+        if: steps.check.outputs.exists == 'true'
       - run: npm run build --if-present
         if: steps.check.outputs.exists == 'true'
       - run: npm run lint || true
