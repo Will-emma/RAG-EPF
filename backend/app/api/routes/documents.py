@@ -5,6 +5,7 @@ import zipfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -113,11 +114,14 @@ async def upload_document(
     await db.commit()
 
     try:
-        pages = extract_pages(file_path)
+        # Extraction et embeddings sont longs et gourmands en CPU : exécutés dans
+        # un thread pour que le serveur continue de répondre pendant l'import
+        # (autres utilisateurs, health check de Render qui abandonne après 5 s).
+        pages = await run_in_threadpool(extract_pages, file_path)
         chunks = chunk_pages(pages)
         if chunks:
             texts = [text for _, text in chunks]
-            embeddings = embed_texts(texts)
+            embeddings = await run_in_threadpool(embed_texts, texts)
             for (page_number, text), embedding in zip(chunks, embeddings):
                 db.add(
                     Chunk(
