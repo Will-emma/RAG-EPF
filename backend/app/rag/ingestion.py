@@ -13,6 +13,12 @@ from app.core.config import settings
 # ce qui permet d'héberger le backend sur une petite instance.
 _embedding_model: TextEmbedding | None = None
 
+# Nombre de passages encodés à la fois. Par défaut fastembed en encode 256 :
+# pour des passages de 800 caractères, la mémoire de travail dépasse alors les
+# 512 Mo de l'instance Render (arrêt forcé en plein import d'un gros cours).
+# Par paquets de 8 : ~250 Mo au pic, même pour 1 500 passages, sans perte de vitesse.
+EMBEDDING_BATCH_SIZE = 8
+
 
 def get_embedding_model() -> TextEmbedding:
     global _embedding_model
@@ -74,4 +80,7 @@ def chunk_pages(
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
     model = get_embedding_model()
-    return [embedding.tolist() for embedding in model.embed(texts)]
+    return [
+        embedding.tolist()
+        for embedding in model.embed(texts, batch_size=EMBEDDING_BATCH_SIZE)
+    ]
