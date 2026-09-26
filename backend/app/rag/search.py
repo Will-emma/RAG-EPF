@@ -1,5 +1,6 @@
 import uuid
 
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +11,8 @@ from app.rag.ingestion import embed_texts
 async def search(query: str, user_id: uuid.UUID, db: AsyncSession, top_k: int = 5):
     """Retourne les top_k chunks les plus pertinents pour une question,
     limités aux documents de l'utilisateur donné."""
-    query_embedding = embed_texts([query])[0]
+    # Calcul CPU dans un thread : ne bloque pas le serveur pendant ce temps
+    query_embedding = (await run_in_threadpool(embed_texts, [query]))[0]
 
     distance = Chunk.embedding.cosine_distance(query_embedding)
     stmt = (
