@@ -27,7 +27,8 @@ pour le détail des endpoints.
 - Frontend : Angular 18 (standalone components, SCSS)
 - Backend : FastAPI (Python)
 - Base de données : PostgreSQL + pgvector
-- Embeddings : sentence-transformers (local, gratuit) — fallback API Mistral
+- Embeddings : fastembed — modèle `all-MiniLM-L6-v2` exécuté localement via ONNX Runtime
+  (gratuit, sans quota externe, ~250 Mo de RAM au lieu de ~900 Mo avec sentence-transformers + torch)
 - LLM : OpenRouter, modèles gratuits (défaut `nvidia/nemotron-3-ultra-550b-a55b:free`,
   clé perso par membre) — voir [Choisir le modèle LLM](#choisir-le-modèle-llm)
 - Agent : LangGraph (mode révision / QCM)
