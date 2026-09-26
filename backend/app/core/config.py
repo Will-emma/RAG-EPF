@@ -18,6 +18,9 @@ class Settings(BaseSettings):
 
     EMBEDDING_PROVIDER: str = "local"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    # Dossier du modèle d'embedding téléchargé (pré-rempli dans l'image Docker).
+    # None = dossier temporaire par défaut de fastembed.
+    EMBEDDING_CACHE_DIR: str | None = None
     MISTRAL_API_KEY: str = ""
 
     MAX_UPLOAD_SIZE_MB: int = 25

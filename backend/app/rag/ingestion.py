@@ -4,17 +4,22 @@ import fitz  # PyMuPDF
 from docx import Document as DocxDocument
 from pptx import Presentation
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 from app.core.config import settings
 
-_embedding_model: SentenceTransformer | None = None
+# fastembed exécute le même modèle all-MiniLM-L6-v2 (384 dimensions, vecteurs
+# identiques) via ONNX Runtime, sans torch : ~250 Mo de RAM au lieu de ~900 Mo,
+# ce qui permet d'héberger le backend sur une petite instance.
+_embedding_model: TextEmbedding | None = None
 
 
-def get_embedding_model() -> SentenceTransformer:
+def get_embedding_model() -> TextEmbedding:
     global _embedding_model
     if _embedding_model is None:
-        _embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL)
+        _embedding_model = TextEmbedding(
+            settings.EMBEDDING_MODEL, cache_dir=settings.EMBEDDING_CACHE_DIR
+        )
     return _embedding_model
 
 
@@ -69,5 +74,4 @@ def chunk_pages(
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
     model = get_embedding_model()
-    embeddings = model.encode(texts, show_progress_bar=False)
-    return embeddings.tolist()
+    return [embedding.tolist() for embedding in model.embed(texts)]
