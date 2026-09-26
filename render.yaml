@@ -7,9 +7,9 @@ services:
     runtime: docker
     plan: free                      # 512 Mo : suffisant depuis le passage à fastembed (~280 Mo au pic)
     region: frankfurt
-    rootDir: backend
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    rootDir: backend                # les chemins Docker ci-dessous sont relatifs à rootDir
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: ENV
