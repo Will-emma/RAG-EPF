@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,6 +8,16 @@ class Settings(BaseSettings):
     ENV: str = "dev"
 
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def use_asyncpg_driver(cls, value: str) -> str:
+        # Les hébergeurs (Render...) fournissent "postgresql://" ou "postgres://" ;
+        # SQLAlchemy async a besoin du driver explicite "postgresql+asyncpg://".
+        for prefix in ("postgresql://", "postgres://"):
+            if value.startswith(prefix):
+                return "postgresql+asyncpg://" + value[len(prefix):]
+        return value
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
