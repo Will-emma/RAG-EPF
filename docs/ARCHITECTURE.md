@@ -14,8 +14,8 @@ adapter pendant le hackathon) :
   - API REST versionnée, doc OpenAPI auto, gestion des erreurs
 - **Pipeline d'ingestion** : extraction texte (PyMuPDF/python-pptx/python-docx)
   → découpage en chunks (LangChain Text Splitter, taille/overlap + métadonnées
-  page/cours) → embeddings (sentence-transformers local, ou API Mistral si
-  quota) → stockage vectoriel (PostgreSQL + pgvector)
+  page/cours) → embeddings (fastembed local : modèle all-MiniLM-L6-v2 via ONNX
+  Runtime) → stockage vectoriel (PostgreSQL + pgvector)
 - **Base de données** : PostgreSQL + pgvector — documents, chunks, embeddings,
   utilisateurs, historique/QCM
 - **LLM** : Z.AI GLM-5.3-Flash, clé API côté backend uniquement (`.env`,
@@ -36,6 +36,12 @@ adapter pendant le hackathon) :
 1. Embeddings locaux (sentence-transformers, gratuit, mais CPU) vs API
    Mistral (quota gratuit limité) — recommandé : **local** pour ne pas
    dépendre d'un quota externe pendant la démo.
+   → **Mise à jour (26/09)** : sentence-transformers a été remplacé par
+   **fastembed**, qui exécute le même modèle (all-MiniLM-L6-v2) via ONNX
+   Runtime au lieu de torch. Vecteurs identiques (similarité cosinus 1,0,
+   mêmes résultats de recherche, cours existants compatibles), mais RAM du
+   backend ~280 Mo au pic au lieu de ~900 Mo et image Docker de 1,4 Go au lieu
+   de 10 Go : le backend tient sur l'offre gratuite de Render (512 Mo).
 2. Stockage vectoriel : pgvector (déjà dans le schéma, simple à héberger avec
    Postgres) plutôt qu'une base vectorielle dédiée (Chroma) pour limiter le
    nombre de services à déployer.
