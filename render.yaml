@@ -1,0 +1,37 @@
+# Blueprint Render (DEVOPS-2) : crée le backend et sa base PostgreSQL en une fois.
+# Render → New → Blueprint → choisir ce dépôt. Les valeurs "sync: false" sont
+# demandées lors de la création (ne jamais les écrire dans ce fichier).
+services:
+  - type: web
+    name: epf-study-ai-api          # → https://epf-study-ai-api.onrender.com (voir frontend/src/environments/environment.prod.ts)
+    runtime: docker
+    plan: free                      # 512 Mo : suffisant depuis le passage à fastembed (~280 Mo au pic)
+    region: frankfurt
+    rootDir: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ENV
+        value: prod
+      - key: DATABASE_URL           # converti automatiquement en postgresql+asyncpg:// (config.py)
+        fromDatabase:
+          name: epf-study-ai-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: LLM_API_KEY            # clé OpenRouter
+        sync: false
+      - key: LLM_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: LLM_MODEL
+        value: nvidia/nemotron-3-ultra-550b-a55b:free
+      - key: CORS_ORIGINS           # URL du frontend Vercel, ex : https://epf-study-ai.vercel.app
+        sync: false
+
+databases:
+  - name: epf-study-ai-db
+    plan: free                      # 1 Go, expire 30 jours après sa création ; pgvector activé au démarrage du backend
+    region: frankfurt
+    databaseName: epf_rag
+    user: epf_rag
