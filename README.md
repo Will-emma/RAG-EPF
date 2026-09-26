@@ -142,6 +142,47 @@ Lancement (l'URL de test reprend les identifiants de votre `.env`) :
 docker exec epf_rag_backend sh -c 'TEST_DATABASE_URL="${DATABASE_URL%/*}/epf_rag_test" python -m pytest -q'
 ```
 
+## Déploiement (Render + Vercel)
+
+**Démo en ligne :** _à compléter après le déploiement_ (frontend Vercel) —
+API : `https://epf-study-ai-api.onrender.com`
+
+Tout est gratuit : backend + PostgreSQL sur **Render** (fichier `render.yaml`),
+frontend sur **Vercel** (fichier `frontend/vercel.json`).
+
+### 1. Backend + base (Render)
+1. https://render.com → se connecter avec GitHub → **New → Blueprint** →
+   choisir ce dépôt (branche `main`).
+2. Render lit `render.yaml` et crée le service `epf-study-ai-api` et la base
+   `epf-study-ai-db` (région Frankfurt). Il demande deux valeurs :
+   - `LLM_API_KEY` : votre clé OpenRouter ;
+   - `CORS_ORIGINS` : l'URL Vercel (étape 2). Si vous ne l'avez pas encore,
+     mettez `https://epf-study-ai.vercel.app` et corrigez ensuite dans
+     *Environment*.
+3. Attendre la fin du build (quelques minutes), puis vérifier
+   `https://epf-study-ai-api.onrender.com/health` → `{"status":"ok","env":"prod"}`.
+   Si Render attribue une autre URL au service, la reporter dans
+   `frontend/src/environments/environment.prod.ts`.
+
+Rien à faire à la main dans la base : le backend active pgvector et crée les
+tables au démarrage, et convertit l'URL fournie par Render au format attendu.
+
+### 2. Frontend (Vercel)
+1. https://vercel.com → se connecter avec GitHub → **Add New → Project** →
+   importer ce dépôt.
+2. **Root Directory : `frontend`** (le reste est lu dans `vercel.json`).
+3. Deploy, puis reporter l'URL obtenue dans `CORS_ORIGINS` sur Render
+   (sans `/` final) et en haut de cette section.
+
+### 3. Avant la démo
+- Le backend gratuit **s'endort après 15 min sans visite** et met environ
+  1 min à se réveiller : ouvrir `/health` quelques minutes avant, puis faire
+  une question dans le chat.
+- La base gratuite **expire 30 jours** après sa création.
+- Les fichiers importés ne sont pas conservés entre deux redémarrages du
+  backend (le texte des cours, lui, reste en base : le chat et le QCM
+  continuent de fonctionner).
+
 ## Choisir le modèle LLM
 
 Le modèle est défini par `LLM_MODEL` dans `.env`. Les modèles gratuits
