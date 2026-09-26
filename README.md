@@ -144,8 +144,9 @@ docker exec epf_rag_backend sh -c 'TEST_DATABASE_URL="${DATABASE_URL%/*}/epf_rag
 
 ## Déploiement (Render + Vercel)
 
-**Démo en ligne :** _à compléter après le déploiement_ (frontend Vercel) —
-API : `https://epf-study-ai-api.onrender.com`
+**Démo en ligne : https://rag-epf.vercel.app** —
+API : `https://epf-study-ai-api.onrender.com` (le premier chargement peut
+prendre ~1 min si le backend était en veille)
 
 Tout est gratuit : backend + PostgreSQL sur **Render** (fichier `render.yaml`),
 frontend sur **Vercel** (fichier `frontend/vercel.json`).
@@ -156,9 +157,9 @@ frontend sur **Vercel** (fichier `frontend/vercel.json`).
 2. Render lit `render.yaml` et crée le service `epf-study-ai-api` et la base
    `epf-study-ai-db` (région Frankfurt). Il demande deux valeurs :
    - `LLM_API_KEY` : votre clé OpenRouter ;
-   - `CORS_ORIGINS` : l'URL Vercel (étape 2). Si vous ne l'avez pas encore,
-     mettez `https://epf-study-ai.vercel.app` et corrigez ensuite dans
-     *Environment*.
+   - `CORS_ORIGINS` : l'URL Vercel (étape 2), aujourd'hui
+     `https://rag-epf.vercel.app`. Plusieurs adresses possibles, séparées par
+     une virgule sans espace. Modifiable ensuite dans *Environment*.
 3. Attendre la fin du build (quelques minutes), puis vérifier
    `https://epf-study-ai-api.onrender.com/health` → `{"status":"ok","env":"prod"}`.
    Si Render attribue une autre URL au service, la reporter dans
