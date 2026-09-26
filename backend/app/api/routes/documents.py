@@ -1,4 +1,7 @@
+import io
+import logging
 import uuid
+import zipfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
@@ -8,12 +11,47 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.db.database import get_db
-from app.db.models import Document, User
-from app.db.models import Chunk
+from app.db.models import Chunk, Document, User
 from app.rag.ingestion import chunk_pages, embed_texts, extract_pages
 from app.schemas.document import DocumentOut
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+logger = logging.getLogger(__name__)
+
+EXTENSION_MIME_TYPES = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+}
+
+
+def detect_document_mime(contents: bytes) -> str | None:
+    """Detect the supported document type from its signature or OOXML package structure."""
+    if b"%PDF-" in contents[:1024]:
+        return EXTENSION_MIME_TYPES[".pdf"]
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(contents)) as archive:
+            names = set(archive.namelist())
+            if "[Content_Types].xml" not in names:
+                return None
+            if archive.getinfo("[Content_Types].xml").file_size > 128 * 1024:
+                return None
+            content_types = archive.read("[Content_Types].xml").lower()
+    except (zipfile.BadZipFile, KeyError, OSError, ValueError):
+        return None
+
+    if (
+        "word/document.xml" in names
+        and b"wordprocessingml.document.main+xml" in content_types
+    ):
+        return EXTENSION_MIME_TYPES[".docx"]
+    if (
+        "ppt/presentation.xml" in names
+        and b"presentationml.presentation.main+xml" in content_types
+    ):
+        return EXTENSION_MIME_TYPES[".pptx"]
+    return None
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -28,6 +66,7 @@ async def upload_document(
 ):
     ext = "." + file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if ext not in settings.allowed_extensions_list:
+        logger.warning("Rejected document upload: unsupported extension")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Extension non autorisée: {ext}. Formats acceptés: {', '.join(settings.allowed_extensions_list)}",
@@ -36,9 +75,23 @@ async def upload_document(
     contents = await file.read()
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > settings.MAX_UPLOAD_SIZE_MB:
+        logger.warning("Rejected document upload: file size limit exceeded")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Fichier trop volumineux ({size_mb:.1f} Mo). Maximum: {settings.MAX_UPLOAD_SIZE_MB} Mo.",
+        )
+
+    expected_mime = EXTENSION_MIME_TYPES.get(ext)
+    detected_mime = detect_document_mime(contents)
+    if expected_mime is None or detected_mime != expected_mime:
+        logger.warning(
+            "Rejected document upload: content does not match extension (extension=%s, detected_mime=%s)",
+            ext,
+            detected_mime or "unknown",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Le contenu du fichier ne correspond pas à son extension.",
         )
 
     document = Document(
@@ -75,8 +128,13 @@ async def upload_document(
                     )
                 )
         document.status = "ready"
-    except Exception:
+    except Exception as exc:
         document.status = "error"
+        logger.error(
+            "Document processing failed (document_id=%s, error_type=%s)",
+            document.id,
+            type(exc).__name__,
+        )
     finally:
         await db.commit()
         await db.refresh(document)
