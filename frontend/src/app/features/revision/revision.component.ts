@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
@@ -13,6 +13,9 @@ interface QcmResponse {
   questions: QuizQuestion[];
 }
 
+type QuestionCount = 5 | 10 | 15 | 20;
+type QcmDifficulty = 'easy' | 'medium' | 'hard';
+
 @Component({
   selector: 'app-revision',
   standalone: true,
@@ -20,7 +23,7 @@ interface QcmResponse {
   templateUrl: './revision.component.html',
   styleUrl: './revision.component.scss'
 })
-export class RevisionComponent implements OnInit {
+export class RevisionComponent {
   currentQuestionIndex = 0;
   selectedAnswer: number | null = null;
   showResult = false;
@@ -29,14 +32,28 @@ export class RevisionComponent implements OnInit {
   questions: QuizQuestion[] = [];
   loading = false;
   errorMessage: string | null = null;
+  quizStarted = false;
+  questionCount: QuestionCount = 5;
+  difficulty: QcmDifficulty = 'medium';
 
   private readonly http = inject(HttpClient);
 
-  ngOnInit(): void {
-    this.loadQuiz();
+  onQuestionCountChange(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    if (value === 5 || value === 10 || value === 15 || value === 20) {
+      this.questionCount = value;
+    }
+  }
+
+  onDifficultyChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'easy' || value === 'medium' || value === 'hard') {
+      this.difficulty = value;
+    }
   }
 
   loadQuiz(): void {
+    this.quizStarted = true;
     this.loading = true;
     this.errorMessage = null;
     this.questions = [];
@@ -44,7 +61,11 @@ export class RevisionComponent implements OnInit {
     this.http
       .post<QcmResponse>(
         `${environment.apiUrl}/agent/qcm`,
-        { course_name: null, num_questions: 5 },
+        {
+          course_name: null,
+          num_questions: this.questionCount,
+          difficulty: this.difficulty
+        },
       )
       .subscribe({
         next: (response) => {
@@ -108,6 +129,14 @@ export class RevisionComponent implements OnInit {
   this.answers = [];
   this.loadQuiz();
 }
+
+  editConfiguration(): void {
+    this.currentQuestionIndex = 0;
+    this.selectedAnswer = null;
+    this.showResult = false;
+    this.answers = [];
+    this.quizStarted = false;
+  }
 
   get score(): number {
   return this.questions.reduce((total, question, index) => {

@@ -39,11 +39,6 @@ describe('RevisionComponent', () => {
     fixture = TestBed.createComponent(RevisionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-
-    const request = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
-    expect(request.request.method).toBe('POST');
-    request.flush({ questions: quizQuestions });
-    fixture.detectChanges();
   });
 
   afterEach(() => {
@@ -54,7 +49,147 @@ describe('RevisionComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows configuration and sends no request before generation is requested', () => {
+    expect(fixture.nativeElement.querySelector('.quiz-setup')).not.toBeNull();
+    expect(component.questionCount).toBe(5);
+    expect(component.difficulty).toBe('medium');
+    httpTestingController.expectNone(`${environment.apiUrl}/agent/qcm`);
+  });
+
+  it('offers all supported question counts and difficulties', () => {
+    const questionCounts: HTMLOptionElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('#question-count option')
+    );
+    const difficulties: HTMLOptionElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('#quiz-difficulty option')
+    );
+
+    expect(questionCounts.map((option) => option.value)).toEqual(['5', '10', '15', '20']);
+    expect(difficulties.map((option) => option.value)).toEqual(['easy', 'medium', 'hard']);
+  });
+
+  it('sends the selected question count and difficulty', () => {
+    const questionCount = fixture.nativeElement.querySelector('#question-count') as HTMLSelectElement;
+    const difficulty = fixture.nativeElement.querySelector('#quiz-difficulty') as HTMLSelectElement;
+    questionCount.value = '10';
+    questionCount.dispatchEvent(new Event('change'));
+    difficulty.value = 'hard';
+    difficulty.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const generateButton = fixture.nativeElement.querySelector('.quiz-setup .primary-button') as HTMLButtonElement;
+    generateButton.click();
+    fixture.detectChanges();
+
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      course_name: null,
+      num_questions: 10,
+      difficulty: 'hard'
+    });
+    expect(component.loading).toBeTrue();
+    request.flush({ questions: quizQuestions });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.quiz-setup')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.quiz-card')).not.toBeNull();
+  });
+
+  it('retry reuses the selected configuration', () => {
+    const questionCount = fixture.nativeElement.querySelector('#question-count') as HTMLSelectElement;
+    const difficulty = fixture.nativeElement.querySelector('#quiz-difficulty') as HTMLSelectElement;
+    questionCount.value = '15';
+    questionCount.dispatchEvent(new Event('change'));
+    difficulty.value = 'easy';
+    difficulty.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.quiz-setup .primary-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const firstRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    firstRequest.flush({ detail: 'Erreur temporaire' }, { status: 502, statusText: 'Bad Gateway' });
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.result-card .primary-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const retryRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    expect(retryRequest.request.body).toEqual({
+      course_name: null,
+      num_questions: 15,
+      difficulty: 'easy'
+    });
+    retryRequest.flush({ questions: quizQuestions });
+  });
+
+  it('restart reuses the selected configuration', () => {
+    component.questionCount = 20;
+    component.difficulty = 'medium';
+    component.loadQuiz();
+    const firstRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    expect(firstRequest.request.body).toEqual({
+      course_name: null,
+      num_questions: 20,
+      difficulty: 'medium'
+    });
+    firstRequest.flush({ questions: quizQuestions });
+
+    component.showResult = true;
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.restart-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const restartRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    expect(restartRequest.request.body).toEqual({
+      course_name: null,
+      num_questions: 20,
+      difficulty: 'medium'
+    });
+    restartRequest.flush({ questions: quizQuestions });
+  });
+
+  it('returns to configuration without generating and keeps previous values editable', () => {
+    component.questionCount = 15;
+    component.difficulty = 'hard';
+    component.loadQuiz();
+    const firstRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    firstRequest.flush({ questions: quizQuestions });
+
+    component.showResult = true;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.restart-button').textContent).toContain('Recommencer');
+
+    (fixture.nativeElement.querySelector('.config-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.quiz-setup')).not.toBeNull();
+    expect((fixture.nativeElement.querySelector('#question-count') as HTMLSelectElement).value).toBe('15');
+    expect((fixture.nativeElement.querySelector('#quiz-difficulty') as HTMLSelectElement).value).toBe('hard');
+    httpTestingController.expectNone(`${environment.apiUrl}/agent/qcm`);
+
+    const questionCount = fixture.nativeElement.querySelector('#question-count') as HTMLSelectElement;
+    const difficulty = fixture.nativeElement.querySelector('#quiz-difficulty') as HTMLSelectElement;
+    questionCount.value = '10';
+    questionCount.dispatchEvent(new Event('change'));
+    difficulty.value = 'medium';
+    difficulty.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.quiz-setup .primary-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const updatedRequest = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    expect(updatedRequest.request.body).toEqual({
+      course_name: null,
+      num_questions: 10,
+      difficulty: 'medium'
+    });
+    updatedRequest.flush({ questions: quizQuestions });
+  });
+
   it('shows the score and reviews every question with the selected and correct answers', () => {
+    component.loadQuiz();
+    const request = httpTestingController.expectOne(`${environment.apiUrl}/agent/qcm`);
+    request.flush({ questions: quizQuestions });
+
     component.answers = [0, 0, null];
     component.showResult = true;
     fixture.detectChanges();
