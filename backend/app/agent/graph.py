@@ -19,10 +19,10 @@ QCM_SYSTEM_PROMPT = (
     "Tu es un générateur de quiz pédagogique pour des étudiants de l'EPF. "
     "À partir d'extraits de cours, tu génères des questions à choix multiples (QCM) "
     "en français, pertinentes et vérifiables directement dans le contexte fourni. "
-    "Réponds UNIQUEMENT avec un tableau JSON valide, sans aucun texte autour, au format exact :\n"
-    '[{"question": "...", "options": ["...", "...", "...", "..."], "correctAnswer": 0}]\n'
-    "- \"options\" contient exactement 4 propositions plausibles.\n"
-    "- \"correctAnswer\" est l'index (0 à 3) de la bonne réponse dans \"options\".\n"
+    "Réponds UNIQUEMENT avec un tableau JSON valide, sans aucun texte autour. "
+    "Chaque élément doit contenir les champs question, options et correctAnswer.\n"
+    "- \"options\" contient exactement 4 propositions distinctes et plausibles.\n"
+    "- \"correctAnswer\" est l'index entier (0 à 3) de la bonne réponse dans \"options\".\n"
     "- Ne pose des questions que sur des éléments explicitement présents dans le contexte."
 )
 
@@ -32,6 +32,37 @@ QCM_SYSTEM_PROMPT = (
 QCM_POOL_SIZE = 20
 QCM_CONTEXT_CHUNKS = 8
 QCM_TEMPERATURE = 0.8
+
+
+def shuffle_question_options(question: dict) -> dict:
+    """Validate one generated question and shuffle its options without losing the answer."""
+    if not isinstance(question, dict):
+        raise ValueError("Chaque question doit être un objet JSON.")
+
+    prompt = question.get("question")
+    options = question.get("options")
+    correct_answer = question.get("correctAnswer")
+
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("Le champ 'question' doit être une chaîne non vide.")
+    if not isinstance(options, list) or len(options) != 4:
+        raise ValueError("Chaque question doit contenir exactement 4 options.")
+    if any(not isinstance(option, str) or not option.strip() for option in options):
+        raise ValueError("Toutes les options doivent être des chaînes non vides.")
+    if len(set(options)) != 4:
+        raise ValueError("Les 4 options d'une question doivent être distinctes.")
+    if type(correct_answer) is not int or not 0 <= correct_answer <= 3:
+        raise ValueError("'correctAnswer' doit être un entier compris entre 0 et 3.")
+
+    correct_option = options[correct_answer]
+    shuffled_options = options.copy()
+    random.shuffle(shuffled_options)
+
+    return {
+        "question": prompt,
+        "options": shuffled_options,
+        "correctAnswer": shuffled_options.index(correct_option),
+    }
 
 
 async def identify_node(state: AgentState, db: AsyncSession) -> AgentState:
@@ -78,10 +109,11 @@ async def generate_questions_node(state: AgentState) -> AgentState:
     try:
         raw = await call_llm(QCM_SYSTEM_PROMPT, user_prompt, temperature=QCM_TEMPERATURE)
         questions = json.loads(raw)
-        assert isinstance(questions, list)
-        for q in questions:
-            assert "question" in q and "options" in q and "correctAnswer" in q
-        state["questions"] = questions
+        if not isinstance(questions, list):
+            raise ValueError("La réponse du modèle doit être un tableau JSON.")
+        if len(questions) != num_questions:
+            raise ValueError(f"Le modèle doit générer exactement {num_questions} questions.")
+        state["questions"] = [shuffle_question_options(question) for question in questions]
         state["error"] = None
     except Exception as e:  # noqa: BLE001
         state["questions"] = []

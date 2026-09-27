@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     LLM_API_KEY: str = ""
     LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
-    LLM_MODEL: str = "z-ai/glm-5.2:free"
+    LLM_MODEL: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
     EMBEDDING_PROVIDER: str = "local"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"

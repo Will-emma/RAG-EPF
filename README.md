@@ -194,6 +194,9 @@ d'OpenRouter (suffixe `:free`) changent souvent : un modèle peut disparaître
   (public, sans clé)
 - Modèle par défaut : `nvidia/nemotron-3-ultra-550b-a55b:free` (testé : chat
   en 1 à 10 s, QCM de 5 questions en 10 à 20 s)
+- Le backend limite chaque réponse à 2 048 tokens (`max_tokens`), un budget
+  suffisant pour le chat et un QCM de 5 questions sans demander la capacité
+  maximale du modèle.
 - Secours gratuit : `dots-studio/dots-3-note-preview:free` (chat correct, mais
   QCM lent, 30 à 40 s, proche du timeout de 30 s du backend)
 - Secours payant : `z-ai/glm-5.2` (nécessite du crédit OpenRouter)

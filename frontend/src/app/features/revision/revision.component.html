@@ -112,32 +112,61 @@
 
   } @else {
 
-    <div class="result-card">
-
-      <div class="result-icon">
-        ✓
+    <div class="result-view">
+      <div class="result-card result-summary">
+        <div class="result-icon">✓</div>
+        <span class="result-label">QUIZ TERMINÉ</span>
+        <h2>Votre résultat</h2>
+        <div class="score">Score : {{ score }}/{{ questions.length }}</div>
+        <p>Vous avez terminé cette session de révision.</p>
       </div>
 
-      <span class="result-label">QUIZ TERMINÉ</span>
+      <div class="correction-list" aria-label="Correction du QCM">
+        @for (question of questions; track $index; let questionIndex = $index) {
+          <article class="review-question">
+            <h3>Question {{ questionIndex + 1 }}</h3>
+            <p class="review-prompt">{{ question.question }}</p>
 
-      <h2>Votre résultat</h2>
+            <ol class="review-options">
+              @for (option of question.options; track $index) {
+                <li
+                  class="review-option"
+                  [class.chosen-correct]="answers[questionIndex] === $index && answers[questionIndex] === question.correctAnswer"
+                  [class.chosen-incorrect]="answers[questionIndex] === $index && answers[questionIndex] !== question.correctAnswer"
+                  [class.correct-answer]="question.correctAnswer === $index && answers[questionIndex] !== question.correctAnswer"
+                >
+                  <span class="review-option-letter">{{ ['A', 'B', 'C', 'D'][$index] }}.</span>
+                  <span class="review-option-text">{{ option }}</span>
+                  @if (answers[questionIndex] === $index) {
+                    <span class="answer-status">
+                      {{ answers[questionIndex] === question.correctAnswer ? 'Votre réponse · correcte' : 'Votre réponse' }}
+                    </span>
+                  }
+                </li>
+              }
+            </ol>
 
-      <div class="score">
-        {{ score }} / {{ questions.length }}
+            @if ((answers[questionIndex] ?? null) === null) {
+              <p class="answer-feedback unanswered">Question non répondue.</p>
+              <p class="correct-answer-text">
+                Bonne réponse : {{ ['A', 'B', 'C', 'D'][question.correctAnswer] }}. {{ question.options[question.correctAnswer] }}
+              </p>
+            } @else if (answers[questionIndex] !== question.correctAnswer) {
+              <p class="correct-answer-text">
+                Bonne réponse : {{ ['A', 'B', 'C', 'D'][question.correctAnswer] }}. {{ question.options[question.correctAnswer] }}
+              </p>
+            }
+          </article>
+        }
       </div>
-
-      <p>
-        Vous avez terminé cette session de révision.
-      </p>
 
       <button
         type="button"
-        class="primary-button"
+        class="primary-button restart-button"
         (click)="restartQuiz()"
       >
         Recommencer
       </button>
-
     </div>
 
   }
