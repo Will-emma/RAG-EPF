@@ -228,6 +228,114 @@
   font-weight: 700;
 }
 
+.result-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.result-summary {
+  padding: 36px 30px;
+}
+
+.correction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-question {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #f1dfe1;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(80, 20, 20, 0.06);
+
+  h3 {
+    margin: 0 0 10px;
+    color: #d71920;
+    font-size: 16px;
+  }
+}
+
+.review-prompt {
+  margin: 0 0 18px;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.review-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #eadcdd;
+  border-radius: 10px;
+  color: #374151;
+}
+
+.review-option-letter {
+  flex: 0 0 auto;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.review-option-text {
+  line-height: 1.5;
+}
+
+.review-option.chosen-correct,
+.review-option.correct-answer {
+  border-color: #16804a;
+  background: #edf9f1;
+  color: #12643b;
+}
+
+.review-option.chosen-incorrect {
+  border-color: #c62828;
+  background: #fff0f0;
+  color: #a61b1b;
+}
+
+.answer-status {
+  margin-left: auto;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.answer-feedback,
+.correct-answer-text {
+  margin: 14px 0 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.unanswered {
+  color: #6b7280;
+}
+
+.correct-answer-text {
+  color: #12643b;
+}
+
+.restart-button {
+  align-self: flex-start;
+}
+
 .result-card p {
   margin: 0 0 26px;
   color: #6b7280;
@@ -264,6 +372,21 @@
     padding: 20px;
   }
 
+  .review-question {
+    padding: 18px;
+  }
+
+  .review-option {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .answer-status {
+    width: 100%;
+    margin-left: 0;
+    text-align: left;
+  }
+
   .question-section {
     h2 {
       font-size: 19px;
@@ -277,5 +400,9 @@
   .primary-button,
   .secondary-button {
     width: 100%;
+  }
+
+  .restart-button {
+    align-self: stretch;
   }
 }

@@ -7,6 +7,10 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Keep completion budgets small enough for the chat and five-question QCM,
+# while avoiding OpenRouter inferring an unaffordable model maximum.
+MAX_TOKENS = 2048
+
 SYSTEM_PROMPT = (
     "Tu es un assistant pédagogique pour des étudiants de l'EPF. "
     "Réponds uniquement à partir du contexte fourni, extrait des cours de l'étudiant. "
@@ -34,6 +38,7 @@ async def call_llm(system_prompt: str, user_prompt: str, temperature: float = 0.
                 headers={"Authorization": f"Bearer {settings.LLM_API_KEY}"},
                 json={
                     "model": settings.LLM_MODEL,
+                    "max_tokens": MAX_TOKENS,
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt},
