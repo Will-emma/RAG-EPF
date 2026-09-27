@@ -30,6 +30,46 @@
       </button>
     </div>
 
+  } @else if (!quizStarted) {
+
+    <div class="quiz-card quiz-setup">
+      <span class="result-label">CONFIGURATION DU QCM</span>
+      <h2>Personnalisez votre quiz</h2>
+
+      <div class="setup-fields">
+        <div class="setup-field">
+          <label for="question-count">Nombre de questions</label>
+          <select
+            id="question-count"
+            [value]="questionCount"
+            (change)="onQuestionCountChange($event)"
+          >
+            <option value="5">5 questions</option>
+            <option value="10">10 questions</option>
+            <option value="15">15 questions</option>
+            <option value="20">20 questions</option>
+          </select>
+        </div>
+
+        <div class="setup-field">
+          <label for="quiz-difficulty">Difficulté</label>
+          <select
+            id="quiz-difficulty"
+            [value]="difficulty"
+            (change)="onDifficultyChange($event)"
+          >
+            <option value="easy">Facile</option>
+            <option value="medium">Moyen</option>
+            <option value="hard">Difficile</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="primary-button" (click)="loadQuiz()">
+        Générer le QCM
+      </button>
+    </div>
+
   } @else if (!showResult) {
 
     <div class="quiz-card">
@@ -160,13 +200,22 @@
         }
       </div>
 
-      <button
-        type="button"
-        class="primary-button restart-button"
-        (click)="restartQuiz()"
-      >
-        Recommencer
-      </button>
+      <div class="result-actions">
+        <button
+          type="button"
+          class="primary-button restart-button"
+          (click)="restartQuiz()"
+        >
+          Recommencer
+        </button>
+        <button
+          type="button"
+          class="secondary-button config-button"
+          (click)="editConfiguration()"
+        >
+          Modifier la configuration
+        </button>
+      </div>
     </div>
 
   }
